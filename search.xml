@@ -1,6 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>什么是“可计算图像”？广义向量图像的理论基础初探</title>
+    <url>/2025/04/21/computable-image-theory-and-application/</url>
+    <content><![CDATA[<blockquote>
+<p>如果说像素图像是“存储”，那么可计算图像则是“生成”——在信息冗余的时代，图像的“可计算性”才是真正高效的信息结构。</p>
+</blockquote>
+<h2
+id="一位图与向量图图像的两种范式">一、位图与向量图：图像的两种范式</h2>
+<p>传统图像采用位图表示，每个像素 <code>I[x, y]</code>
+是颜色数据。但这种方式存在信息冗余，且难以缩放。相比之下，<strong>矢量图使用几何图元与函数表示图像</strong>，具有结构清晰、可缩放、易修改等优点。</p>
+<p>SVG 示例：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">svg</span> <span class="attr">width</span>=<span class="string">&quot;120&quot;</span> <span class="attr">height</span>=<span class="string">&quot;120&quot;</span> <span class="attr">viewBox</span>=<span class="string">&quot;0 0 120 120&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2000/svg&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">circle</span> <span class="attr">cx</span>=<span class="string">&quot;60&quot;</span> <span class="attr">cy</span>=<span class="string">&quot;60&quot;</span> <span class="attr">r</span>=<span class="string">&quot;50&quot;</span> <span class="attr">stroke</span>=<span class="string">&quot;black&quot;</span> <span class="attr">stroke-width</span>=<span class="string">&quot;3&quot;</span> <span class="attr">fill</span>=<span class="string">&quot;tomato&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">svg</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>渲染如下：</p>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<circle cx="60" cy="60" r="50" stroke="black" stroke-width="3" fill="tomato" />
+</svg>
+<p>⸻</p>
+<h2 id="二可计算图像的数学基础">二、可计算图像的数学基础</h2>
+<p>图像是函数</p>
+<p>我们可以将图像视为函数：</p>
+<p><span
+class="math display"><em>I</em> : ℝ<sup>2</sup> → ℝ<sup>3</sup>,  <em>I</em>(<em>x</em>, <em>y</em>) = (<em>r</em>, <em>g</em>, <em>b</em>)</span></p>
+<p>即图像是二维平面上到 RGB
+空间的映射。若该函数可由程序计算，则称之为可计算图像（Computable
+Image）。</p>
+<p>可计算函数</p>
+<p>函数 <span
+class="math inline"><em>I</em>(<em>x</em>, <em>y</em>)</span>
+是可计算的，当存在有限程序可在任意精度下逼近 <span
+class="math inline"><em>I</em>(<em>x</em>, <em>y</em>)</span>。这就为构建图像的“生成逻辑”提供了理论依据。</p>
+<p>⸻</p>
+<h2 id="三表示范式">三、表示范式</h2>
+<ol type="1">
+<li>参数图像（SVG、TikZ）</li>
+</ol>
+<p>图像是参数的组合，如：</p>
+<figure class="highlight latex"><table><tr><td class="code"><pre><span class="line"><span class="keyword">\draw</span>[blue, thick] (0,0) circle (1cm);</span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>过程图像（Procedural）</li>
+</ol>
+<p>图像通过代码生成，如：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">image</span>(<span class="params">x, y</span>):</span><br><span class="line">    <span class="keyword">return</span> (sin(x * <span class="number">3.14</span>), x % <span class="number">1</span>, y % <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<ol start="3" type="1">
+<li>生成模型（GAN）</li>
+</ol>
+<p><span
+class="math display"><em>I</em>(<em>z</em>) = Decoder(<em>z</em>)</span></p>
+<p>潜变量生成图像，是可计算图像的一种神经建模形式。</p>
+<p>⸻</p>
+<h2 id="四博客中的实际应用">四、博客中的实际应用</h2>
+<p>使用 Mermaid 插图</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">graph TD;</span><br><span class="line">  A[Pixel 图像] --&gt;|存储密集| B[位图]</span><br><span class="line">  A --&gt;|生成函数| C[向量图]</span><br><span class="line">  C --&gt; D[SVG]</span><br><span class="line">  C --&gt; E[Procedural]</span><br><span class="line">  C --&gt; F[GAN]</span><br></pre></td></tr></table></figure>
+<p>使用 MathJax 显示公式</p>
+<p>示例公式：</p>
+<p><span class="math display">$$
+I(x, y) = \begin{cases}
+\text{红色}, &amp; x^2 + y^2 &lt; 1 \
+\text{蓝色}, &amp; \text{否则}
+\end{cases}
+$$</span></p>
+<p>⸻</p>
+<h2 id="五总结">五、总结</h2>
+<p>“可计算图像”代表了图像表示从静态数据向函数式建模的范式转变。它不仅能节省空间、提高显示效果，更为自动化内容生成和科学可视化提供坚实基础。</p>
+<p>未来图像的更多可能性，将由程序来定义。</p>
+<p>⸻</p>
+]]></content>
+      <categories>
+        <category>技术理论</category>
+      </categories>
+      <tags>
+        <tag>图像处理</tag>
+        <tag>向量图</tag>
+        <tag>SVG</tag>
+        <tag>可计算性</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2025/04/21/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very
