@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="研究札记：为什么深层参数化量子线路的优化失败，不只是梯度消失的问题。">
+  <meta name="theme-color" content="#0d1b1e">
+  <title>梯度消失不是全部 | Taotao Zhao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">TZ</span>
+        <span class="brand-copy">
+          <strong>Taotao Zhao</strong>
+          <span>研究札记</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/">主页</a>
+        <a href="/notes/">札记目录</a>
+        <a href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Scholar</a>
+        <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="article-main">
+      <article class="article-shell reveal">
+        <a class="back-link" href="/notes/">返回札记目录</a>
+        <header class="article-header">
+          <p class="eyebrow">问题札记</p>
+          <h1 class="article-title">深层 PQC 为什么会系统性失效</h1>
+          <p class="article-deck">
+            贫瘠高原解释了梯度衰减，却没有解释深层线路为什么整体失去可优化性。这篇只做一件事：把失败从一阶现象推进到结构问题。
+          </p>
+          <div class="article-meta-row">
+            <span class="article-meta-pill">问题</span>
+            <span class="article-meta-pill">PQC</span>
+            <span class="article-meta-pill">深层线路</span>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p class="lead">
+            很多讨论把深层 PQC 的困难压缩成一句话: 梯度消失了，所以优化失败。这句话不算错，但它太快了。它跳过了真正需要解释的部分。梯度为什么消失，只是第一层问题。更深一层的问题是，为什么线路一旦变深，几乎所有熟悉的优化工具都会一起失灵。
+          </p>
+
+          <h2>贫瘠高原解释了什么</h2>
+          <p>
+            贫瘠高原理论给出的是一阶层面的失败机制。随着线路深度增加，梯度方差快速衰减，局部导数变得指数级微弱。于是，基于梯度的更新失去方向性，也失去幅度。沿着这个逻辑，优化失败似乎已经得到了说明。
+          </p>
+          <p>
+            这个结论很重要。它告诉我，深层线路不是一个常规的非凸优化问题。欧式空间里那套“只要步长合适，总能慢慢走下去”的直觉，在这里并不成立。可它仍然没有回答最尖锐的问题: 为什么即使离开纯粹的一阶方法，深层线路依旧顽固地难以训练。
+          </p>
+
+          <h2>为什么这个解释还不够</h2>
+          <p>
+            如果问题只在梯度，那么我们本该能通过别的途径补救。我们可以换优化器，换初始化，换启发式搜索，或者直接利用成本函数的一维解析结构。但现实并不是这样。很多方法在浅层有效，一到深层就同时退化。这件事说明，失败的对象不是某一种算法细节，而是算法所依赖的信息本身。
+          </p>
+          <p>
+            换句话说，深层线路的困难不是“梯度太小”这么简单，而是局部可区分性正在消失。参数微调无法稳定地区分更好与更坏的方向。成本函数本身也越来越缺乏分辨率。优化器没有读到足够的信息，自然不可能持续地产生有效更新。
+          </p>
+
+          <h2>真正扩散的是区分能力</h2>
+          <p>
+            我更愿意把这个现象理解成区分能力的扩散。多量子比特门建立纠缠，同时也把系统推向高维的希尔伯特空间。空间一旦足够大，集中现象就会变得强烈。很多局部差异不再表现为稳定、可读的函数变化，而是被稀释到高维结构里。
+          </p>
+          <p>
+            这时，参数化线路虽然还在探索状态空间，但它不再提供一个良态的坐标系统。参数仍然存在，目标函数也仍然存在，可参数变化与目标变化之间的对应关系开始恶化。优化器面对的不是“噪声更大”的老问题，而是“坐标本身正在失效”的新问题。
+          </p>
+
+          <h2>深层失败是一种结构退化</h2>
+          <p>
+            一旦这样看，很多现象就连起来了。浅层线路里，很多参数近乎独立，低阶信息足以支撑优化。深层线路里，参数之间的高阶耦合迅速扩散，旧优化器读取的仍然是一阶或单参数切片，于是它们看到的就只剩下局部残影。方法没有变笨，是它看到的对象已经变了。
+          </p>
+          <p>
+            这也是我不愿意把问题理解成“再发明一个更聪明的梯度下降”的原因。只要优化器默认参数是近乎独立的，只要它默认目标函数可以被局部低阶信息良好近似，它在深层线路里就会天然失去抓手。深层失败不是技巧问题，而是结构问题。
+          </p>
+
+          <blockquote>
+            如果一个优化器只读取一阶信息，它实际上默认参数近乎独立。这个前提在深层线路里往往并不成立。
+          </blockquote>
+
+          <h2>接下来应该问什么</h2>
+          <p>
+            真正值得追问的，不再是“怎样让梯度再大一点”，而是“深层线路里究竟还剩下哪些可利用的结构”。如果参数相关性是由线路中的纠缠结构逐步建立起来的，那么这些结构信息就不只是附属现象，它们可能正是优化问题真正的入口。
+          </p>
+          <p>
+            我现在更在意的是这条线索: 深层 PQC 的失败，并非因为目标函数神秘地不可优化，而是因为我们长期使用的低阶读法已经不再匹配它的结构。一旦这个判断成立，优化器的设计逻辑就必须整体重写。
+          </p>
+        </div>
+
+        <nav class="article-nav" aria-label="Related notes">
+          <a class="article-nav-card" href="/notes/initialization-limits/">
+            <span>下一步</span>
+            <strong>初始化为什么只能延缓失效</strong>
+          </a>
+          <a class="article-nav-card" href="/notes/structure-aware-optimizer/">
+            <span>继续阅读</span>
+            <strong>真正面向 PQC 的优化器</strong>
+          </a>
+        </nav>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <p>本地草稿。札记正在持续扩写，暂不推送远端。</p>
+    </footer>
+  </div>
+
+  <script src="/js/site.js"></script>
+</body>
+</html>

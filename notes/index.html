@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Taotao Zhao 的研究札记目录，围绕深层参数化量子线路的优化失效、初始化边界、结构化优化器与实验工具展开。">
+  <meta name="theme-color" content="#0d1b1e">
+  <title>Research Notes | Taotao Zhao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">TZ</span>
+        <span class="brand-copy">
+          <strong>Taotao Zhao</strong>
+          <span>研究札记</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/">主页</a>
+        <a href="/notes/">札记目录</a>
+        <a href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Scholar</a>
+        <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="article-main">
+      <section class="article-shell reveal">
+        <a class="back-link" href="/">返回主页</a>
+        <header class="article-header">
+          <p class="eyebrow">研究札记</p>
+          <h1 class="article-title">研究札记</h1>
+          <p class="article-deck">
+            这些札记围绕同一件事：深层 PQC 为什么会失去优化能力。它们不是综述，而是按问题拆开的工作笔记。
+          </p>
+          <div class="article-meta-row">
+            <span class="article-meta-pill">问题</span>
+            <span class="article-meta-pill">方法</span>
+            <span class="article-meta-pill">工具</span>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p class="lead">
+            我现在关心的问题并不分散。它们都指向同一件事：深层参数化量子线路为什么会失去可训练性。如果这个问题没有被正面解决，那么很多关于量子优势和大规模变分算法的叙述都站不稳。
+          </p>
+          <p>
+            因此，这些札记不追求覆盖领域。我只把主线拆成几个问题：深层失效的性质、初始化的边界，以及优化器到底还该读取什么信息。
+          </p>
+          <p>
+            另外也保留少量工具札记。模拟、算力和实验配置看似外围，实际上决定很多判断能否落成方法。
+          </p>
+        </div>
+
+        <div class="note-grid">
+          <a class="note-card" href="/notes/deep-circuit-failure/">
+            <span class="note-meta">问题札记</span>
+            <h2>深层 PQC 为什么会系统性失效</h2>
+            <p>贫瘠高原解释了梯度衰减，却没有解释深层线路为什么整体失去可优化性。这里把失败从一阶现象推进到结构问题。</p>
+          </a>
+          <a class="note-card" href="/notes/initialization-limits/">
+            <span class="note-meta">问题札记</span>
+            <h2>初始化为什么只能延缓失效</h2>
+            <p>好的初始点改善前期可读性，却不改变深层线路继续建立高阶相关性的事实。它改变的是起点，不是机制。</p>
+          </a>
+          <a class="note-card" href="/notes/structure-aware-optimizer/">
+            <span class="note-meta">方法札记</span>
+            <h2>真正面向 PQC 的优化器应当利用什么信息</h2>
+            <p>如果失效来自参数相关性的扩散，那么优化器就不能继续只读一阶信息。它必须先识别结构，再决定更新。</p>
+          </a>
+        </div>
+
+        <div class="article-body">
+          <blockquote>
+            如果写作只是整理已有结论，它的价值很有限。真正有用的写作，应该暴露问题、收紧判断，并把下一步实验的方向逼出来。
+          </blockquote>
+        </div>
+
+        <div class="article-body">
+          <h2>工具</h2>
+          <p>
+            工具问题并不在主线之外。模拟器怎么选、算力怎么配、哪些近似值得信，最后都会回到结构判断。
+          </p>
+        </div>
+
+        <div class="note-grid">
+          <a class="note-card" href="/notes/choose-quantum-simulator/">
+            <span class="note-meta">工具札记</span>
+            <h2>量子线路模拟器怎么选</h2>
+            <p>先问线路在制造什么样的纠缠，再问有多少显存。结构判断先于算力预算。</p>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>本地草稿。札记正在持续扩写，暂不推送远端。</p>
+    </footer>
+  </div>
+
+  <script src="/js/site.js"></script>
+</body>
+</html>

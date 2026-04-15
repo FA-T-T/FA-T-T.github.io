@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="研究札记：为什么初始化只能延缓深层参数化量子线路的优化失效，而不能从根本上解决失效。">
+  <meta name="theme-color" content="#0d1b1e">
+  <title>初始化为什么只能延缓失效 | Taotao Zhao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">TZ</span>
+        <span class="brand-copy">
+          <strong>Taotao Zhao</strong>
+          <span>研究札记</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/">主页</a>
+        <a href="/notes/">札记目录</a>
+        <a href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Scholar</a>
+        <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="article-main">
+      <article class="article-shell reveal">
+        <a class="back-link" href="/notes/">返回札记目录</a>
+        <header class="article-header">
+          <p class="eyebrow">问题札记</p>
+          <h1 class="article-title">初始化为什么只能延缓失效</h1>
+          <p class="article-deck">
+            初始化当然重要。但它改变的是进入问题的方式，不改变问题本身。只要高阶相关性仍在扩散，它就只能推迟失败。
+          </p>
+          <div class="article-meta-row">
+            <span class="article-meta-pill">问题</span>
+            <span class="article-meta-pill">初始化</span>
+            <span class="article-meta-pill">深层线路</span>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p class="lead">
+            很多人看到深层 PQC 难以训练，第一反应是去找一个更好的初始点。这条路并不奇怪。参数优化问题首先就是从初值开始的。一个差的初始点会让优化器在第一步就失去方向，一个好的初始点则可能把训练曲线明显拉起来。可我越来越明确地认为，这条路最多只能延缓失效，无法解决失效。
+          </p>
+
+          <h2>为什么初始化总是被寄予厚望</h2>
+          <p>
+            这个期待并非没有依据。初始化确实能改变早期优化的可读性。它可以让梯度稍大一些，让局部景观稍平滑一些，也可以让参数先落在一个更接近任务结构的区域。因此，很多初始化工作在浅层线路或有限步数实验里都会给出很漂亮的结果。
+          </p>
+          <p>
+            但正因为这些结果常常出现在训练早期，它们也最容易被误读。早期更顺利，不等于长期更可训练。让前二十步更好走，不等于回答了深层线路为什么最终还是会陷入困难。
+          </p>
+
+          <h2>初始化真正改变了什么</h2>
+          <p>
+            我更愿意把初始化理解成一种起点控制。它决定的是优化从哪一个局部区域出发，以怎样的局部信息开始读取目标函数。如果这个起点足够好，那么低阶信息在一开始可能更清晰，梯度也可能更可用，单参数切片也可能更接近真实结构。
+          </p>
+          <p>
+            这件事很重要。它解释了为什么初始化经常能显著改善前期表现。它不是幻觉，而是因为优化器在一开始确实读取到了更多有用信息。可它的作用范围也到此为止。它改善的是早期可读性，而不是后续演化规律。
+          </p>
+
+          <h2>它没有改变什么</h2>
+          <p>
+            初始化并没有改变线路的生成机制。门还是那些门，纠缠结构还是那个纠缠结构，深度增加时建立高阶相关性的过程也仍然存在。如果成本函数在深层中会把功率从低阶项迁移到更高阶项，那么一个更好的起点并不能阻止这个迁移。它只能让迁移发生得晚一点，或者让优化器在进入坏区间之前多走几步。
+          </p>
+          <p>
+            这就是我认为最关键的边界。初始化改变的是参数位置，不是参数关系。可深层失效越来越像一个关系问题，而不是一个位置问题。只要参数之间的高阶耦合继续扩散，只要低阶结构继续丢失主导地位，优化器迟早会面对同一个结构性困难。
+          </p>
+
+          <blockquote>
+            初始化可以选择从哪里进入问题，但它不能决定问题是否还存在。
+          </blockquote>
+
+          <h2>深层失效不是起点问题，而是演化问题</h2>
+          <p>
+            这也是为什么我不把初始化视为最终答案。若失效机制只是“初始点落错了地方”，那么一个足够聪明的初始化理应能长期修复训练。但我们看到的更像是另一件事: 初始点可以推迟崩塌，却无法阻止系统沿着深度继续走向高阶耦合、局部分辨率下降与有效信息塌缩。
+          </p>
+          <p>
+            换句话说，深层 PQC 的难点不是某个坏起点，而是线路在优化过程中不断把自己带向一个低阶方法不再适用的区间。初始化顶多影响何时进入这个区间，不能取消这个区间本身。
+          </p>
+
+          <h2>应该怎样评价一种初始化</h2>
+          <p>
+            我认为，初始化方法不该只用“最初几十步的下降更快”来评价。更合理的问题是: 它是否改变了失效随深度出现的尺度关系。若一种初始化只是把训练曲线整体向右平移一点，而没有改变失效深度与系统规模之间的关系，那么它更像是缓解，而不是解决。
+          </p>
+          <p>
+            因此，更有信息量的实验不应只报告最终 loss 或短程收敛速度，还应报告随着深度增加，局部可分辨性、参数相关性和单位调用收益如何演化。如果这些量仍然以同样方式塌缩，那么初始化的角色就必须被诚实地界定为“延缓”，而不是“修复”。
+          </p>
+
+          <h2>这篇札记真正要强调什么</h2>
+          <p>
+            我并不是在削弱初始化的价值。相反，我认为它非常有用，只是它的位置必须被放对。初始化适合做入口控制，适合争取前期可读性，适合配合结构检测去避免过早坠入坏区间。但如果目标是从根本上解决深层 PQC 的训练难题，那么真正需要被重写的，仍然是优化器读取结构的方式。
+          </p>
+          <p>
+            也正因为如此，初始化的讨论最终会把我再次带回相关性与结构演化问题。只要深层线路的主导结构不断从低阶走向更强的高阶耦合，任何只改变起点而不改变读法的方法，终究都只能延缓失效，而不能解决失效。
+          </p>
+        </div>
+
+        <nav class="article-nav" aria-label="Related notes">
+          <a class="article-nav-card" href="/notes/deep-circuit-failure/">
+            <span>上一篇</span>
+            <strong>为什么深层 PQC 会系统性失效</strong>
+          </a>
+          <a class="article-nav-card" href="/notes/structure-aware-optimizer/">
+            <span>下一篇</span>
+            <strong>真正面向 PQC 的优化器</strong>
+          </a>
+        </nav>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <p>本地草稿。札记正在持续扩写，暂不推送远端。</p>
+    </footer>
+  </div>
+
+  <script src="/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="研究札记：如果深层 PQC 的问题来自参数相关性的扩散，那么优化器应该如何真正利用结构信息。">
+  <meta name="theme-color" content="#0d1b1e">
+  <title>真正面向 PQC 的优化器 | Taotao Zhao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">TZ</span>
+        <span class="brand-copy">
+          <strong>Taotao Zhao</strong>
+          <span>研究札记</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/">主页</a>
+        <a href="/notes/">札记目录</a>
+        <a href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Scholar</a>
+        <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="article-main">
+      <article class="article-shell reveal">
+        <a class="back-link" href="/notes/">返回札记目录</a>
+        <header class="article-header">
+          <p class="eyebrow">方法札记</p>
+          <h1 class="article-title">真正面向 PQC 的优化器应当利用什么信息</h1>
+          <p class="article-deck">
+            如果深层失效来自参数相关性的扩散，那么优化器的任务就不是继续修补一阶方法，而是读取真正还在起作用的结构。
+          </p>
+          <div class="article-meta-row">
+            <span class="article-meta-pill">方法</span>
+            <span class="article-meta-pill">优化器</span>
+            <span class="article-meta-pill">相关性</span>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p class="lead">
+            我现在越来越明确地认为，PQC 优化器设计的问题，不是“再找一个更强的通用优化算法”。真正的问题是，现有优化器几乎都在读取同一类低阶信息。一旦深层线路不再由这类信息主导，它们就会看起来同时失效。
+          </p>
+
+          <h2>现有优化器为什么会一起失效</h2>
+          <p>
+            梯度下降、动量法、Adam 依赖一阶导数。Rotosolve 依赖单参数方向上的解析三角结构。很多初始化策略依赖的则是把系统放进一个更容易被低阶信息读到的区域。它们表面上不同，实际上都建立在一个共同前提上: 参数要么近乎独立，要么只存在可控的弱耦合。
+          </p>
+          <p>
+            这个前提在浅层里往往成立，所以这些方法看上去都还不错。问题在于，深层线路恰恰打破了这个前提。参数不再是松散排列的坐标，而是被纠缠结构逐步绑成一个高阶耦合系统。这时，继续在一阶信息附近修修补补，很难换来真正的突破。
+          </p>
+
+          <h2>新优化器首先要放弃什么假设</h2>
+          <p>
+            我认为，第一件事是放弃“参数默认独立”这个隐含假设。第二件事是放弃“单参数切片足够代表局部几何”这个习惯性想法。第三件事是承认，深层线路里的有效更新对象，未必还是单个参数，甚至未必是一个固定大小的参数块。
+          </p>
+          <p>
+            一旦这几个假设被拿掉，优化器的目标就会改变。它不再只是计算更新量，而是要先回答一个更基本的问题: 当前线路里，哪些参数之间真正耦合，耦合到了什么程度，哪一层结构仍然值得被读。
+          </p>
+
+          <h2>我倾向的三条设计原则</h2>
+          <p>
+            第一，先检测，再更新。优化器不应盲目假设低阶结构仍然主导，而应先用有限的线路调用去估计当前的参数相关性与局部结构。如果系统仍处在低阶区，廉价方法就足够。如果系统已经进入高阶耦合区，更新策略必须立刻改变。
+          </p>
+          <p>
+            第二，成组更新，而不是逐点更新。只要成对项或更高阶项开始占据主导，单参数更新就会天然丢失关键信息。此时更合理的对象应当是参数对、局部块，甚至由相关性图诱导出的自适应子系统。
+          </p>
+          <p>
+            第三，估计开销必须与结构绑定，而不能与全维度绑定。真正可用的优化器不能走向完整高阶张量重建，那会把问题再次做坏。它应该只探测最有可能主导更新的结构，构造局部 surrogate，然后在小范围内做精确更新。
+          </p>
+
+          <blockquote>
+            真正面向 PQC 的优化器，不是更聪明地使用旧信息，而是更准确地判断当前还有哪些信息值得被读取。
+          </blockquote>
+
+          <h2>一个可能的原型</h2>
+          <p>
+            我现在更偏好的原型不是 Hessian 型大工具，而是一个结构自适应流程。它可以很朴素，但必须抓住问题本身:
+          </p>
+          <div class="equation-card">
+            <pre>1. Probe local distinguishability and pair correlations
+2. Build a parameter interaction graph
+3. Select single, pair, or block updates adaptively
+4. Fit a local structure-aware surrogate on the chosen subspace
+5. Update and re-probe when the regime changes</pre>
+          </div>
+          <p>
+            这个框架的关键不在于形式多复杂，而在于它终于承认“优化前先识别结构”这件事是必要的。它不把检测当成额外负担，而把它当成避免无效更新的前置条件。
+          </p>
+
+          <h2>最值得先做的实验</h2>
+          <p>
+            如果让我现在就做实验，我不会先追求最复杂的优化器。我会先验证一个更基础的命题: 局部可分辨性和参数相关性检测，是否真的能预测不同优化器的失效深度。只要这一点成立，结构感知优化器就有了坚实的经验基础。
+          </p>
+          <p>
+            一个直接的实验方案是，在不同深度的 HEA 上同时记录局部可分辨性、成对相关性强度、以及多种优化器的单位调用收益。若这些量之间出现稳定对应，那么“结构先行”的路线就不再只是直觉，而会变成一条可执行的方法线。
+          </p>
+
+          <h2>最后的问题</h2>
+          <p>
+            我现在不再把目标写成“设计一个更强的优化器”。这个说法太宽，也太空。更准确的说法是: 设计一个真正读取 PQC 结构的优化器。只有当优化器开始利用参数相关性与结构分层，深层线路的可训练性问题才可能被正面推进。
+          </p>
+        </div>
+
+        <nav class="article-nav" aria-label="Related notes">
+          <a class="article-nav-card" href="/notes/initialization-limits/">
+            <span>上一篇</span>
+            <strong>初始化为什么只能延缓失效</strong>
+          </a>
+          <a class="article-nav-card" href="/notes/deep-circuit-failure/">
+            <span>回看问题</span>
+            <strong>为什么深层 PQC 会系统性失效</strong>
+          </a>
+        </nav>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <p>本地草稿。札记正在持续扩写，暂不推送远端。</p>
+    </footer>
+  </div>
+
+  <script src="/js/site.js"></script>
+</body>
+</html>

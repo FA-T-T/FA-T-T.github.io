@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="研究札记：量子线路模拟器怎么选。先看线路结构与纠缠增长，再决定是状态向量、张量网络、稳定子还是混合方法。">
+  <meta name="theme-color" content="#0d1b1e">
+  <title>量子线路模拟器怎么选 | Taotao Zhao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">TZ</span>
+        <span class="brand-copy">
+          <strong>Taotao Zhao</strong>
+          <span>研究札记</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/">主页</a>
+        <a href="/notes/">札记目录</a>
+        <a href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Scholar</a>
+        <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="article-main">
+      <article class="article-shell reveal">
+        <a class="back-link" href="/notes/">返回札记目录</a>
+        <header class="article-header">
+          <p class="eyebrow">工具札记</p>
+          <h1 class="article-title">量子线路模拟器怎么选</h1>
+          <p class="article-deck">
+            先问线路在制造什么样的纠缠，再问需要多少显存。模拟器选择不是从算力开始，而是从结构判断开始。
+          </p>
+          <div class="article-meta-row">
+            <span class="article-meta-pill">工具</span>
+            <span class="article-meta-pill">量子模拟</span>
+            <span class="article-meta-pill">GPU</span>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p class="lead">
+            量子线路模拟器不是越精确越好，也不是越大越好。真正的问题是，什么样的线路值得用什么样的模拟器。如果这个问题没有先想清楚，后面的算力预算、GPU 数量和并行方案，很容易一开始就走偏。
+          </p>
+
+          <h2>很多人一开始就问错了问题</h2>
+          <p>
+            最常见的问法是: 我有 36 个 qubit，应该用什么模拟器。这个问法并不完全错，但它抓错了主导因素。决定模拟成本的，不只是 qubit 数量，还有线路是否在快速制造全局纠缠、门是不是局部的、目标到底是全振幅还是测量采样。
+          </p>
+          <p>
+            同样是 36 个 qubit，结果可能完全不同。一个局部、浅层、接近一维结构的线路，张量网络方法可能非常轻松。一个深层、随机、强烈搅乱信息的线路，即使 qubit 数更少，也会把张量网络迅速推到失效边缘。规模重要，但结构更重要。
+          </p>
+
+          <h2>状态向量方法适合什么时候</h2>
+          <p>
+            状态向量是最直接的思路。它把整个量子态完整地存下来。优点也非常清楚。它是精确的，调试直观，采样简单，很多实现和硬件支持都最成熟。只要你能装得下，它几乎总是最稳的基线。
+          </p>
+          <p>
+            但它的代价同样直接。每多一个 qubit，内存几乎就翻一倍。30 个 qubit 的双精度复数状态向量，大约已经是 16GB。35 个 qubit 会涨到 512GB 左右。40 个 qubit 则直接到 16TB 量级。很多人一看到多 GPU 就觉得问题解决了，其实并没有。多卡确实能多装几个 qubit，但同时也把通信带宽推成新的瓶颈。
+          </p>
+          <p>
+            所以，如果你的线路本身就是强全局纠缠、深层随机、或者根本没有明显的局部结构，那么状态向量往往仍然是最现实的选择。不是因为它便宜，而是因为别的方法会先坏掉。
+          </p>
+
+          <h2>张量网络为什么经常更划算</h2>
+          <p>
+            张量网络方法真正利用的，不是规模小，而是结构简单。它默认一件事：虽然系统整体很大，但有效相关性也许并没有在全局无节制地扩散。只要这个前提还成立，模拟就可以被压缩得非常厉害。
+          </p>
+          <p>
+            这也是为什么很多一维链、浅层 ansatz、局部门模型、近端 VQE 或近似绝热过程，都会天然更适合 MPS 一类方法。你不需要保存整个状态，只需要保存那些真正还在增长的相关性。
+          </p>
+          <p>
+            但它的边界也很明确。一旦纠缠开始快速增长，所需的 bond dimension 就会上去。起初你只是觉得计算变慢，再往后就是内存和精度一起恶化。张量网络的失败方式不是突然崩掉，而是慢慢失去性价比。
+          </p>
+
+          <h2>稳定子方法不是冷门技巧，而是特例王者</h2>
+          <p>
+            如果线路大部分是 Clifford 门，那么问题会变得简单得多。稳定子模拟器可以在非常大的 qubit 数上跑得极快。很多纠错协议、传态流程和 Clifford-heavy 的基准测试，都应该先试这一类方法，而不是一上来就跑状态向量。
+          </p>
+          <p>
+            但这里没有灰色地带。稳定子方法快，是因为它抓住了非常特殊的结构。一旦非 Clifford 成分，尤其是 T 门或 magic 资源开始明显增多，这种优势就会迅速消失。所以它很强，但只在自己的边界里强。
+          </p>
+
+          <h2>混合方法值得认真对待</h2>
+          <p>
+            还有一类方法经常被低估，就是混合方案。它们不试图从头到尾只靠一种表示，而是把线路切开，在某些部分用状态向量，在某些部分用张量收缩、切片或目标振幅计算。
+          </p>
+          <p>
+            这种方法最适合那种“完全状态向量装不下，但线路又不是毫无结构”的场景。比如中等深度的二维格点、只关心一批特定 bitstring 的振幅、或者可以沿着低耦合边界做切分的图。它的上限往往很高，但工程门槛也最高。切得好，收益很大。切得不好，指数代价会原样回来。
+          </p>
+
+          <blockquote>
+            模拟器选择不是从算力开始，而是从结构判断开始。先看线路在做什么，再看机器能承受什么。
+          </blockquote>
+
+          <h2>真正实用的选择顺序</h2>
+          <p>
+            我更推荐一个很朴素的顺序，而不是先选库再补理解。
+          </p>
+          <p>
+            第一步，先在小规模版本上看纠缠增长。不要急着跑目标规模，先做 12 到 20 qubit 的 pilot，看深度上去之后相关性到底涨得快不快。
+          </p>
+          <p>
+            第二步，如果纠缠始终局部而温和，就优先张量网络。不要因为 qubit 数看起来“大”就本能地上状态向量。
+          </p>
+          <p>
+            第三步，如果线路很快进入接近 volume-law 的状态，那就别在张量网络上硬耗时间，直接转向状态向量或分布式状态向量。
+          </p>
+          <p>
+            第四步，如果线路明显是 Clifford-heavy，就先试稳定子。这个判断常常能直接省掉一整级算力预算。
+          </p>
+          <p>
+            第五步，如果 qubit 太多、结构又还在，就考虑混合方案。尤其是当你并不需要整个波函数，只关心部分振幅或测量批次时，它往往比纯状态向量更聪明。
+          </p>
+
+          <h2>一个足够实用的容量直觉</h2>
+          <p>
+            关于 GPU 预算，其实只要记住几个数字就够了。状态向量里，每多一个 qubit，显存几乎翻倍。80GB 这一档的 GPU，双精度状态向量通常也就是 32 qubit 左右的现实上限。单精度会稍好一点，但不会从根本上改写量级。
+          </p>
+          <p>
+            多 GPU 的收益也不要想得太乐观。4 张卡并不等于你就能随意多跑很多 qubit。理想情况下，卡数翻倍只换来很有限的 qubit 增长，现实里通信缓冲和 all-to-all 会进一步吃掉收益。很多时候，真正限制你的不是总显存，而是节点之间搬数据的速度。
+          </p>
+          <p>
+            相比之下，张量网络的容量更像是在赌一个问题：所需的 bond dimension 会不会随着深度快速炸掉。如果不会，它常常能比状态向量省出一个数量级以上的内存。如果会，它就会很快失去优势。
+          </p>
+
+          <h2>按任务选，不要按流行词选</h2>
+          <p>
+            一维链上的 VQE、浅层 ansatz、DMRG 风格问题，先试 MPS。这通常不是折中，而是正解。
+          </p>
+          <p>
+            深层随机线路、benchmarking、强搅乱线路、较深的 QAOA，优先状态向量。这里想靠张量网络“碰碰运气”，多数时候只是在把失败推迟一点。
+          </p>
+          <p>
+            纠错协议、传态、Clifford-heavy 流程，先试稳定子。它在这一类问题上常常没有对手。
+          </p>
+          <p>
+            中等深度二维格点、目标振幅计算、受限采样任务，则优先考虑混合方法。这里最关键的不是库名，而是图切分是否真的合理。
+          </p>
+
+          <h2>最后的判断</h2>
+          <p>
+            选模拟器这件事，表面上是在做算力规划，实际上是在做结构判断。第一步不是问你有多少张 GPU，而是问你的线路到底有没有在快速制造全局纠缠。
+          </p>
+          <p>
+            如果结构还在，张量网络和混合方法会非常划算。如果结构已经被彻底打散，状态向量往往才是那个老但可靠的答案。真正好的选择，从来不是追最流行的方法，而是先承认线路本身在做什么。
+          </p>
+        </div>
+
+        <nav class="article-nav" aria-label="Related notes">
+          <a class="article-nav-card" href="/notes/deep-circuit-failure/">
+            <span>回到主线</span>
+            <strong>为什么深层 PQC 会系统性失效</strong>
+          </a>
+          <a class="article-nav-card" href="/notes/structure-aware-optimizer/">
+            <span>继续阅读</span>
+            <strong>真正面向 PQC 的优化器</strong>
+          </a>
+        </nav>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <p>本地草稿。札记正在持续扩写，暂不推送远端。</p>
+    </footer>
+  </div>
+
+  <script src="/js/site.js"></script>
+</body>
+</html>

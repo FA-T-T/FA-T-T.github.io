@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="赵涛涛的个人主页：聚焦参数化量子线路、可训练性、优化器设计，并汇集 Google Scholar 与 ORCID 的公开学术信息。">
+  <meta name="description" content="赵涛涛的研究主页：围绕参数化量子线路的可训练性、深层优化失效、参数相关性与优化器设计展开。">
   <meta name="theme-color" content="#0d1b1e">
-  <meta property="og:title" content="Taotao Zhao | Research Homepage">
-  <meta property="og:description" content="Research homepage with current focus, academic profiles, and selected publications.">
+  <meta property="og:title" content="Taotao Zhao | 研究札记">
+  <meta property="og:description" content="围绕参数化量子线路可训练性、深层优化失效、初始化边界与优化器设计展开的研究札记。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.everylink.site/">
   <meta property="og:image" content="https://www.everylink.site/images/avatar.gif">
-  <title>Taotao Zhao | Research Homepage</title>
+  <title>Taotao Zhao | 研究札记</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -24,43 +24,44 @@
         <span class="brand-mark">TZ</span>
         <span class="brand-copy">
           <strong>Taotao Zhao</strong>
-          <span>Academic Homepage</span>
+          <span>研究札记</span>
         </span>
       </a>
       <nav class="site-nav" aria-label="Primary">
-        <a href="#about">Research</a>
-        <a href="#profiles">Profiles</a>
-        <a href="#publications">Publications</a>
-        <a href="#projects">Code</a>
-        <a href="#contact">Contact</a>
+        <a href="#about">问题</a>
+        <a href="#view">判断</a>
+        <a href="#notes">札记</a>
+        <a href="#profiles">档案</a>
+        <a href="#publications">论文</a>
+        <a href="#projects">代码</a>
+        <a href="#contact">联系</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero reveal">
         <div class="hero-copy">
-          <p class="eyebrow">Academic Homepage</p>
-          <h1>Taotao Zhao</h1>
+          <p class="eyebrow">Taotao Zhao</p>
+          <h1>参数化量子线路在深层时为什么会失去优化能力?</h1>
           <p class="hero-text">
-            我的公开学术记录横跨量子信息与通信系统优化，而当前更稳定、也更长期的兴趣，集中在参数化量子线路的可训练性问题：
-            优化器设计、Barren Plateau、训练动力学，以及参数初始化。
+            我关心的不是 PQC 是否足够灵活，而是它为什么在深层线路中失去可优化性。贫瘠高原解释了梯度衰减，却没有解释为什么现有方法会在深层中一起失效。
           </p>
           <p class="hero-text">
-            Google Scholar 当前公开信息显示我关联 Southeast University，关键词包括 Quantum information 与 quantum computing。
-            ORCID 的公开就业条目则列出 School of Electronic Science and Engineering, Southeast University。
+            如果函数值、梯度和局部可分辨性都在深层中塌缩，那么问题就不再是怎样沿梯度下降，而是线路里到底还剩下什么结构可以被利用。
           </p>
           <div class="hero-actions">
+            <a class="button button-primary" href="/notes/">阅读札记</a>
             <a class="button button-primary" href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Google Scholar</a>
             <a class="button button-secondary" href="https://orcid.org/0000-0003-3479-5377" target="_blank" rel="noreferrer">ORCID</a>
             <a class="button button-secondary" href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
           </div>
         </div>
         <aside class="hero-panel reveal">
-          <p class="panel-label">Academic Snapshot</p>
+          <p class="panel-label">公开记录</p>
           <div class="metric-grid">
             <article class="metric-card">
               <span class="metric-value">114</span>
-              <span class="metric-label">Citations</span>
+              <span class="metric-label">引用</span>
             </article>
             <article class="metric-card">
               <span class="metric-value">5</span>
@@ -81,11 +82,11 @@
               <strong>0000-0003-3479-5377</strong>
             </article>
             <article>
-              <span>Affiliation</span>
+              <span>机构</span>
               <strong>Southeast University, Nanjing</strong>
             </article>
             <article>
-              <span>Snapshot Date</span>
+              <span>更新日期</span>
               <strong>April 15, 2026</strong>
             </article>
           </div>
@@ -94,136 +95,193 @@
 
       <section id="about" class="section reveal">
         <div class="section-heading">
-          <p class="eyebrow">Research</p>
-          <h2>研究方向</h2>
+          <p class="eyebrow">问题</p>
+          <h2>我关心的问题</h2>
         </div>
         <div class="split-layout">
           <div class="essay-card">
             <p>
-              我更关心那些决定训练是否真正发生的问题。PQC 的困难往往不在表达能力，而在梯度能否稳定传递、优化器是否理解线路结构、以及初始化是否把模型放进一个仍有信号的区域。
+              我不把 PQC 的困难理解成表达能力不足。真正的问题是，线路一旦变深，参数就开始失去可调控性。梯度变小只是表象。更严重的是，低阶信息不再足以支撑优化。
             </p>
             <p>
-              但我也不希望主页只剩一句抽象口号。研究方向可以有偏好，学术身份必须可核验。因此这次页面更新把 Scholar 与 ORCID 放进主体结构里，让“我在研究什么”和“公开记录如何描述我”同时成立。
+              所以我更关心失败机制，而不是表面症状。只要问题还被理解成“一阶信息太小”，就很容易把注意力继续押在旧方法的修补上。
             </p>
           </div>
           <div class="fact-card">
             <div>
-              <span class="fact-label">Current Focus</span>
-              <strong>PQC trainability, optimizer design, initialization, barren plateaus</strong>
+              <span class="fact-label">研究对象</span>
+              <strong>深层 PQC 的可训练性</strong>
             </div>
             <div>
-              <span class="fact-label">Scholar Keywords</span>
-              <strong>Quantum information, quantum computing</strong>
+              <span class="fact-label">主要切口</span>
+              <strong>优化器、初始化、参数相关性</strong>
             </div>
             <div>
-              <span class="fact-label">Public Employment Entry</span>
-              <strong>School of Electronic Science and Engineering, Southeast University</strong>
+              <span class="fact-label">当前判断</span>
+              <strong>深层失效首先是结构问题</strong>
             </div>
           </div>
         </div>
       </section>
 
+      <section id="view" class="section reveal">
+        <div class="section-heading">
+          <p class="eyebrow">判断</p>
+          <h2>我的当前判断</h2>
+        </div>
+        <div class="agenda-list">
+          <article>
+            <span class="agenda-index">01</span>
+            <div>
+              <h3>贫瘠高原不是终点，只是起点。</h3>
+              <p>它解释了梯度为何失效，但没有解释为什么现有方法会在深层线路中一起失灵。只讨论一阶信息，会把问题看得过窄。</p>
+            </div>
+          </article>
+          <article>
+            <span class="agenda-index">02</span>
+            <div>
+              <h3>深层线路的问题，本质上是参数相关性的扩散。</h3>
+              <p>浅层时很多参数近乎独立，低阶结构足以支撑优化。深层时高阶耦合主导，旧方法不是不够巧，而是它们依赖的信息已经不再占主导。</p>
+            </div>
+          </article>
+          <article>
+            <span class="agenda-index">03</span>
+            <div>
+              <h3>初始化可以推迟问题，但不能取消问题。</h3>
+              <p>好的初始点能够改善训练前期的可读性，却不能改变深层线路持续建立高阶相关性的事实。只要失效机制来自结构演化，初始化就只能延缓，而不能解决。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="notes" class="section reveal">
+        <div class="section-heading">
+          <p class="eyebrow">札记</p>
+          <h2>近期札记</h2>
+        </div>
+        <div class="note-grid">
+          <a class="note-card" href="/notes/deep-circuit-failure/">
+            <span class="note-meta">问题札记</span>
+            <h3>深层 PQC 为什么会系统性失效</h3>
+            <p>贫瘠高原解释了梯度衰减，却没有解释深层线路为什么整体失去可优化性。这里把失败从一阶现象推进到结构问题。</p>
+          </a>
+          <a class="note-card" href="/notes/initialization-limits/">
+            <span class="note-meta">问题札记</span>
+            <h3>初始化为什么只能延缓失效</h3>
+            <p>好的初始点改善前期可读性，却不改变深层线路继续建立高阶相关性的事实。它改变的是起点，不是机制。</p>
+          </a>
+          <a class="note-card" href="/notes/structure-aware-optimizer/">
+            <span class="note-meta">方法札记</span>
+            <h3>真正面向 PQC 的优化器应当利用什么信息</h3>
+            <p>如果失效来自参数相关性的扩散，那么优化器就不能继续只读一阶信息。它必须先识别结构，再决定更新。</p>
+          </a>
+        </div>
+        <div class="section-link-row">
+          <a class="note-index-link" href="/notes/">进入完整札记目录</a>
+        </div>
+      </section>
+
       <section id="profiles" class="section reveal">
         <div class="section-heading">
-          <p class="eyebrow">Profiles</p>
-          <h2>学术档案</h2>
+          <p class="eyebrow">档案</p>
+          <h2>公开记录</h2>
         </div>
         <div class="profile-grid">
           <a class="profile-card" href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">
             <span class="project-tag">Google Scholar</span>
-            <h3>Scholar Profile</h3>
-            <p>公开条目显示：Taotao Zhao，Southeast University，verified email at seu.edu.cn。</p>
-            <p>当前可见指标：114 citations，h-index 5，i10-index 3。</p>
+            <h3>Scholar</h3>
+            <p>Taotao Zhao，verified email at seu.edu.cn。</p>
+            <p>114 citations · h-index 5 · i10-index 3。</p>
           </a>
           <a class="profile-card" href="https://orcid.org/0000-0003-3479-5377" target="_blank" rel="noreferrer">
             <span class="project-tag">ORCID</span>
-            <h3>ORCID Record</h3>
-            <p>ORCID iD: 0000-0003-3479-5377。</p>
-            <p>公开就业条目列出 Southeast University, Nanjing，并给出 ROR 标识的机构信息。</p>
+            <h3>ORCID</h3>
+            <p>0000-0003-3479-5377。</p>
+            <p>School of Electronic Science and Engineering, Southeast University。</p>
           </a>
           <a class="profile-card" href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">
             <span class="project-tag">Code</span>
             <h3>GitHub</h3>
-            <p>实验仓库、原型验证与实现路径统一从这里向外展开。</p>
-            <p>主页本身也部署在 GitHub Pages 上，更新路径清晰、可追踪。</p>
+            <p>FA-T-T。</p>
+            <p>主要代码入口。</p>
           </a>
         </div>
       </section>
 
       <section id="publications" class="section reveal">
         <div class="section-heading">
-          <p class="eyebrow">Publications</p>
-          <h2>代表论文</h2>
+          <p class="eyebrow">论文</p>
+          <h2>部分论文</h2>
         </div>
         <div class="publication-grid">
           <article class="publication-card">
             <span class="project-tag">2025</span>
             <h3>HiQC: hybrid quantum classical deep learning with parameter efficient quantum modules</h3>
             <p>Quantum Machine Intelligence, 2025.</p>
-            <p>这是当前公开 Scholar 页面里最直接指向量子方向的一篇代表作。</p>
+            <p>这篇最接近我当前关心的量子问题。</p>
           </article>
           <a class="publication-card" href="http://dx.doi.org/10.1109/tcomm.2024.3369724" target="_blank" rel="noreferrer">
             <span class="project-tag">2024</span>
             <h3>Energy Efficiency of Wireless-Powered Cell-Free mMIMO With Hardware Impairments</h3>
             <p>IEEE Transactions on Communications, 2024.</p>
-            <p>来自 ORCID 公开 works 记录，可直接通过 DOI 访问。</p>
+            <p>更早的优化工作。</p>
           </a>
           <a class="publication-card" href="https://doi.org/10.1109/JIOT.2023.3273619" target="_blank" rel="noreferrer">
             <span class="project-tag">2023</span>
             <h3>Energy-Efficient Federated Learning Over Cell-Free IoT Networks: Modeling and Optimization</h3>
             <p>IEEE Internet of Things Journal, 2023.</p>
-            <p>Google Scholar 当前引用数最高的公开条目之一。</p>
+            <p>先看结构，再谈优化。</p>
           </a>
           <a class="publication-card" href="http://dx.doi.org/10.3390/e24020157" target="_blank" rel="noreferrer">
             <span class="project-tag">2022</span>
             <h3>A Fault-Tolerant Transmission Scheme in SDN-Based Industrial IoT over Fiber-Wireless Networks</h3>
             <p>Entropy, 2022.</p>
-            <p>展示了公开发表记录里另一条较完整的系统优化方向。</p>
+            <p>不是量子论文，但方法习惯是一致的。</p>
           </a>
           <a class="publication-card" href="https://doi.org/10.3390/math10101687" target="_blank" rel="noreferrer">
             <span class="project-tag">2022</span>
             <h3>Cell-Free Massive MIMO with Energy-Efficient Downlink Operation in Industrial IoT</h3>
             <p>Mathematics, 2022.</p>
-            <p>与 ORCID works 列表一致，补足当前公开记录中的连续研究线索。</p>
+            <p>问题最后总会回到结构、复杂度与可执行性。</p>
           </a>
         </div>
       </section>
 
       <section id="projects" class="section reveal">
         <div class="section-heading">
-          <p class="eyebrow">Code</p>
+          <p class="eyebrow">代码</p>
           <h2>研究代码</h2>
         </div>
         <div class="project-grid">
           <a class="project-card" href="https://github.com/FA-T-T/genQC" target="_blank" rel="noreferrer">
             <span class="project-tag">Repository</span>
             <h3>genQC</h3>
-            <p>围绕量子计算研究与实验搭建的核心仓库，承担长期实现与迭代任务。</p>
+            <p>当前量子研究的主仓库。</p>
           </a>
           <a class="project-card" href="https://github.com/FA-T-T/Variational-Quantum-Linear-Solver" target="_blank" rel="noreferrer">
             <span class="project-tag">Repository</span>
             <h3>Variational Quantum Linear Solver</h3>
-            <p>VQLS 相关实现与实验记录，保留从问题设定到变分求解的完整痕迹。</p>
+            <p>一个足够典型的试验场。</p>
           </a>
           <a class="project-card" href="https://github.com/FA-T-T/vqls-prototype" target="_blank" rel="noreferrer">
             <span class="project-tag">Repository</span>
             <h3>vqls-prototype</h3>
-            <p>更轻量的原型验证环境，适合快速检查假设与线路设计。</p>
+            <p>快速试错环境。</p>
           </a>
           <a class="project-card" href="https://github.com/FA-T-T/Quantum-Computing" target="_blank" rel="noreferrer">
             <span class="project-tag">Repository</span>
             <h3>Quantum-Computing</h3>
-            <p>更宽范围的量子计算学习与实验积累，为当前研究提供背景材料与实现脉络。</p>
+            <p>更宽的量子计算积累。</p>
           </a>
         </div>
       </section>
 
       <section id="contact" class="section contact-section reveal">
         <div class="contact-card">
-          <p class="eyebrow">Contact</p>
+          <p class="eyebrow">联系</p>
           <h2>联系方式</h2>
           <p>
-            我更愿意讨论明确的问题：某个 ansatz 为什么失去训练信号，某类优化器为什么在量子场景里失效，或者公开发表记录如何与当前研究计划重新对齐。
+            如果交流，最好直接从具体问题开始。
           </p>
           <div class="contact-links">
             <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">
@@ -248,7 +306,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>Updated with Google Scholar and ORCID public records on April 15, 2026.</p>
+      <p>本地草稿。未推送远端。</p>
     </footer>
   </div>
 
