@@ -253,6 +253,38 @@ main {
   margin-top: 24px;
 }
 
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.metric-card {
+  padding: 16px 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.metric-value {
+  display: block;
+  font-family: "Fraunces", serif;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--text);
+}
+
+.metric-label {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
 .signal-grid article {
   padding-top: 14px;
   border-top: 1px solid var(--line);
@@ -319,7 +351,9 @@ main {
 }
 
 .card-grid,
-.project-grid {
+.project-grid,
+.profile-grid,
+.publication-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
@@ -385,6 +419,43 @@ main {
   background: linear-gradient(180deg, rgba(239, 143, 90, 0.16), rgba(238, 231, 219, 0.08));
 }
 
+.profile-card,
+.publication-card {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.profile-card:hover,
+.profile-card:focus-visible,
+.publication-card:hover,
+.publication-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(241, 187, 140, 0.45);
+}
+
+.profile-card h3,
+.publication-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+  color: var(--text);
+}
+
+.profile-card p,
+.publication-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.profile-card p + p,
+.publication-card p + p {
+  margin-top: 10px;
+}
+
 .contact-section {
   padding-bottom: 24px;
 }
@@ -443,7 +514,9 @@ main {
   .hero,
   .split-layout,
   .card-grid,
-  .project-grid {
+  .project-grid,
+  .profile-grid,
+  .publication-grid {
     grid-template-columns: 1fr;
   }
 
@@ -474,6 +547,10 @@ main {
 
   .hero {
     padding-top: 18px;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero h1 {
