@@ -1,3 +1,5 @@
+---
+---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -31,6 +33,7 @@
         <a href="#about">问题</a>
         <a href="#view">判断</a>
         <a href="#notes">札记</a>
+        <a href="/blog/">博客</a>
         <a href="#profiles">档案</a>
         <a href="#publications">论文</a>
         <a href="#projects">代码</a>
@@ -181,6 +184,38 @@
         </div>
       </section>
 
+      <section id="blog" class="section reveal">
+        <div class="section-heading">
+          <p class="eyebrow">博客</p>
+          <h2>写作入口</h2>
+        </div>
+        <div class="note-grid">
+          {% if site.posts.size > 0 %}
+            {% for post in site.posts limit: 3 %}
+            <a class="note-card" href="{{ post.url | relative_url }}">
+              <span class="note-meta">{{ post.eyebrow | default: "博客" }}</span>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.excerpt_text | default: post.excerpt | strip_html | truncate: 120 }}</p>
+            </a>
+            {% endfor %}
+          {% else %}
+            <a class="note-card" href="/blog/">
+              <span class="note-meta">Jekyll</span>
+              <h3>博客已经切到 Markdown</h3>
+              <p>公开文章放进 <code>_posts/</code>，未准备发布的内容放进 <code>_drafts/</code>。以后写博客，不再需要手写整页 HTML。</p>
+            </a>
+            <a class="note-card" href="/blog/">
+              <span class="note-meta">当前草稿</span>
+              <h3>优化器怎么选</h3>
+              <p>这篇文章已经转成 Jekyll 草稿，放在 <code>_drafts/optimizer-selection.md</code>，后续直接按 Markdown 继续写。</p>
+            </a>
+          {% endif %}
+        </div>
+        <div class="section-link-row">
+          <a class="note-index-link" href="/blog/">进入博客目录</a>
+        </div>
+      </section>
+
       <section id="profiles" class="section reveal">
         <div class="section-heading">
           <p class="eyebrow">档案</p>
@@ -306,7 +341,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>本地草稿。未推送远端。</p>
+      <p>本站正在切换到 Jekyll 写作流程，博客文章将从 Markdown 生成。</p>
     </footer>
   </div>
 

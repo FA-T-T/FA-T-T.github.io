@@ -1,0 +1,25 @@
+---
+layout: default
+---
+<main class="article-main">
+  <article class="article-shell reveal">
+    <a class="back-link" href="{{ '/blog/' | relative_url }}">返回博客目录</a>
+    <header class="article-header">
+      <p class="eyebrow">{{ page.eyebrow | default: '博客' }}</p>
+      <h1 class="article-title">{{ page.title }}</h1>
+      {% if page.deck %}
+      <p class="article-deck">{{ page.deck }}</p>
+      {% endif %}
+      <div class="article-meta-row">
+        <span class="article-meta-pill">{{ page.date | date: "%Y-%m-%d" }}</span>
+        {% for tag in page.tags limit: 3 %}
+        <span class="article-meta-pill">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </header>
+
+    <div class="article-body">
+      {{ content }}
+    </div>
+  </article>
+</main>

@@ -1,0 +1,31 @@
+title: Taotao Zhao
+description: 赵涛涛的研究主页与博客，围绕参数化量子线路的可训练性、深层优化失效、初始化边界与优化器设计展开。
+url: "https://www.everylink.site"
+lang: zh-CN
+timezone: Asia/Shanghai
+markdown: kramdown
+permalink: /:categories/:year/:month/:day/:title/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      categories:
+        - blog
+      author: Taotao Zhao
+      image: /images/avatar.gif
+      eyebrow: 博客
+  - scope:
+      path: ""
+    values:
+      image: /images/avatar.gif
+
+exclude:
+  - .gitignore
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - STYLE_ANALYSIS.md
+  - templates/

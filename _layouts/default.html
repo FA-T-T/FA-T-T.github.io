@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: 'zh-CN' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ page.description | default: site.description | escape }}">
+  <meta name="theme-color" content="#f4f1ea">
+  <meta property="og:title" content="{{ page.title | default: site.title | escape }}">
+  <meta property="og:description" content="{{ page.description | default: site.description | escape }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:image" content="{{ page.image | default: '/images/avatar.gif' | absolute_url }}">
+  <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="{{ '/css/site.css' | relative_url }}">
+</head>
+<body{% if page.body_class %} class="{{ page.body_class }}"{% endif %}>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="{{ '/' | relative_url }}">
+        <span class="brand-mark">TZ</span>
+        <span class="brand-copy">
+          <strong>Taotao Zhao</strong>
+          <span>研究札记</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="{{ '/' | relative_url }}">首页</a>
+        <a href="{{ '/blog/' | relative_url }}">博客</a>
+        <a href="{{ '/notes/' | relative_url }}">札记</a>
+        <a href="https://scholar.google.com/citations?user=pwxHHcMAAAAJ&hl=en" target="_blank" rel="noreferrer">Scholar</a>
+        <a href="https://github.com/FA-T-T" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    {{ content }}
+
+    <footer class="site-footer">
+      <p>本站使用 Jekyll 生成，托管于 GitHub Pages。</p>
+    </footer>
+  </div>
+
+  <script src="{{ '/js/site.js' | relative_url }}"></script>
+</body>
+</html>

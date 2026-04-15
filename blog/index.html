@@ -1,0 +1,58 @@
+---
+layout: default
+title: 博客
+description: 使用 Jekyll 和 Markdown 管理的博客目录。公开文章写在 _posts，未准备发布的内容放在 _drafts。
+---
+<main class="article-main">
+  <section class="article-shell reveal">
+    <a class="back-link" href="{{ '/' | relative_url }}">返回主页</a>
+    <header class="article-header">
+      <p class="eyebrow">博客</p>
+      <h1 class="article-title">博客</h1>
+      <p class="article-deck">
+        这里放公开发布的中文文章。以后写博客，不再需要手写整页 HTML。
+        公开文章放进 <code>_posts/</code>，未准备发布的内容放进 <code>_drafts/</code>。
+      </p>
+      <div class="article-meta-row">
+        <span class="article-meta-pill">Markdown</span>
+        <span class="article-meta-pill">Jekyll</span>
+        <span class="article-meta-pill">GitHub Pages</span>
+      </div>
+    </header>
+
+    <div class="article-body">
+      <p class="lead">
+        我保留了原来的研究主页与札记结构，但博客写作入口已经切到了 Jekyll。
+        从现在开始，如果只是写文章，本质上只需要维护 Markdown 文件。
+      </p>
+      <p>
+        公开文章文件路径是 <code>_posts/YYYY-MM-DD-slug.md</code>。
+        尚未准备发布的草稿放在 <code>_drafts/</code>。
+        GitHub Pages 会在推送到主分支后自动构建公开文章，草稿不会被发布。
+      </p>
+    </div>
+
+    <div class="note-grid">
+      {% if site.posts.size > 0 %}
+        {% for post in site.posts %}
+        <a class="note-card" href="{{ post.url | relative_url }}">
+          <span class="note-meta">{{ post.eyebrow | default: '博客' }}</span>
+          <h2>{{ post.title }}</h2>
+          <p>{{ post.excerpt_text | default: post.excerpt | strip_html | truncate: 120 }}</p>
+        </a>
+        {% endfor %}
+      {% else %}
+        <article class="note-card">
+          <span class="note-meta">写作入口</span>
+          <h2>还没有公开博客</h2>
+          <p>这是正常状态。直接复制 <code>templates/post-template.md</code> 到 <code>_posts/</code> 或 <code>_drafts/</code> 开始写即可。</p>
+        </article>
+        <article class="note-card">
+          <span class="note-meta">当前草稿</span>
+          <h2>优化器怎么选</h2>
+          <p>我已经把这篇未发布文章转成了 Jekyll 草稿，放在 <code>_drafts/optimizer-selection.md</code>。</p>
+        </article>
+      {% endif %}
+    </div>
+  </section>
+</main>
