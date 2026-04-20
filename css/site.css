@@ -602,6 +602,38 @@ main {
   color: var(--muted);
 }
 
+.article-body table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--panel-strong);
+}
+
+.article-body th,
+.article-body td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  line-height: 1.72;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.article-body th {
+  color: var(--text);
+  font-weight: 600;
+  background: var(--bg-soft);
+}
+
+.article-body tr:last-child td {
+  border-bottom: 0;
+}
+
 .article-body li {
   margin: 0 0 10px;
   line-height: 1.8;
