@@ -1,0 +1,23 @@
+---
+import ProjectCard from "@components/ProjectCard.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import projects from "@data/projects.json";
+---
+
+<BaseLayout title="Projects" description="Repository and project browser." bodyClass="projects-page">
+  <main class="article-main mac-main">
+    <section class="article-shell reveal mac-window">
+      <a class="back-link" href="/">返回主页</a>
+      <header class="article-header">
+        <p class="eyebrow">Projects</p>
+        <h1 class="article-title">Repositories</h1>
+        <p class="article-deck">
+          Public repositories, skills, experiment packages, and toolkits are grouped as projects.
+        </p>
+      </header>
+      <div class="project-grid">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

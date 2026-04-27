@@ -1,0 +1,241 @@
+---
+interface Props {
+  project: {
+    slug: string;
+    title: string;
+    repo: string;
+    branch: string;
+    sourceUrl: string;
+    summary: string;
+    focus: string;
+  };
+}
+
+const { project } = Astro.props;
+---
+
+<section class="project-browser" data-project-explorer data-manifest={`/project-data/${project.slug}/manifest.json`}>
+  <aside class="project-sidebar" aria-label={`${project.title} file tree`}>
+    <div class="browser-panel-head">
+      <span class="card-kicker">file tree</span>
+      <strong>{project.repo}</strong>
+    </div>
+    <label class="filter-field">
+      <span>筛选文件</span>
+      <input data-file-filter type="search" placeholder="README, .py, .tex, .pdf" />
+    </label>
+    <div class="tree-status" data-tree-status>正在读取项目清单...</div>
+    <nav class="file-tree" data-file-tree aria-label="Project files"></nav>
+  </aside>
+  <article class="file-preview" aria-live="polite">
+    <header class="preview-header">
+      <div>
+        <span class="card-kicker" data-preview-type>preview</span>
+        <h2 data-preview-title>{project.title}</h2>
+      </div>
+      <a class="source-link" href={project.sourceUrl} target="_blank" rel="noreferrer">打开仓库</a>
+    </header>
+    <div class="preview-empty" data-preview-empty>
+      <p>{project.summary}</p>
+      <p>{project.focus}</p>
+    </div>
+    <div class="preview-body" data-preview-body hidden></div>
+  </article>
+</section>
+
+<script>
+  // @ts-nocheck
+  import DOMPurify from "dompurify";
+  import { marked } from "marked";
+
+  const markdownExtensions = new Set([".md", ".mdx", ".markdown"]);
+  const textExtensions = new Set([
+    ".txt",
+    ".text",
+    ".py",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".js",
+    ".ts",
+    ".tsx",
+    ".jsx",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".tex",
+    ".bib",
+    ".css",
+    ".html",
+    ".rs",
+    ".go",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp"
+  ]);
+
+  marked.use({
+    gfm: true,
+    breaks: false
+  });
+
+  function formatBytes(value) {
+    if (!Number.isFinite(value)) return "";
+    if (value < 1024) return `${value} B`;
+    if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+    return `${(value / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  function createTree(files) {
+    const root = { name: "", path: "", children: new Map(), files: [] };
+
+    files.forEach((file) => {
+      const parts = file.path.split("/");
+      let node = root;
+
+      parts.slice(0, -1).forEach((part, index) => {
+        const folderPath = parts.slice(0, index + 1).join("/");
+        if (!node.children.has(part)) {
+          node.children.set(part, { name: part, path: folderPath, children: new Map(), files: [] });
+        }
+        node = node.children.get(part);
+      });
+
+      node.files.push(file);
+    });
+
+    return root;
+  }
+
+  function renderTreeNode(node, container, state, depth = 0) {
+    const folders = [...node.children.values()].sort((a, b) => a.name.localeCompare(b.name));
+    const files = [...node.files].sort((a, b) => a.path.localeCompare(b.path));
+
+    folders.forEach((folder) => {
+      const details = document.createElement("details");
+      details.open = depth < 1;
+      details.style.setProperty("--depth", String(depth));
+      const summary = document.createElement("summary");
+      summary.textContent = folder.name;
+      details.append(summary);
+      const group = document.createElement("div");
+      group.className = "tree-group";
+      details.append(group);
+      container.append(details);
+      renderTreeNode(folder, group, state, depth + 1);
+    });
+
+    files.forEach((file) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "file-node";
+      button.dataset.path = file.path;
+      button.style.setProperty("--depth", String(depth));
+      button.disabled = !file.preview;
+      button.innerHTML = `<span>${file.path.split("/").at(-1)}</span><small>${formatBytes(file.size)}</small>`;
+      button.addEventListener("click", () => selectFile(file, state));
+      container.append(button);
+    });
+  }
+
+  function languageLabel(file) {
+    const ext = file.extension?.replace(".", "") || "text";
+    if (ext === "md" || ext === "markdown") return "markdown";
+    if (ext === "sh" || ext === "bash" || ext === "zsh") return "shell";
+    if (ext === "tex") return "latex";
+    if (ext === "yml") return "yaml";
+    return ext;
+  }
+
+  async function selectFile(file, state) {
+    state.title.textContent = file.path;
+    state.type.textContent = file.extension || "file";
+    state.empty.hidden = true;
+    state.body.hidden = false;
+    state.body.innerHTML = `<div class="loading-line">正在读取 ${file.path}</div>`;
+    state.tree.querySelectorAll(".file-node").forEach((node) => {
+      node.classList.toggle("is-active", node.dataset.path === file.path);
+    });
+
+    if (file.extension === ".pdf") {
+      state.body.innerHTML = `<iframe class="pdf-frame" title="${file.path}" src="${encodeURI(file.cachedPath || file.rawUrl)}"></iframe>`;
+      return;
+    }
+
+    if (!file.cachedPath) {
+      state.body.innerHTML = `<p class="preview-note">这个文件没有进入静态预览缓存，可以从原仓库打开。</p>`;
+      return;
+    }
+
+    const response = await fetch(encodeURI(file.cachedPath));
+    const text = await response.text();
+
+    if (markdownExtensions.has(file.extension)) {
+      const html = DOMPurify.sanitize(marked.parse(text));
+      state.body.innerHTML = `<div class="rendered-markdown">${html}</div>`;
+      return;
+    }
+
+    if (textExtensions.has(file.extension) || file.cachedPath) {
+      const code = document.createElement("code");
+      code.textContent = text;
+      code.className = `language-${languageLabel(file)}`;
+      const pre = document.createElement("pre");
+      pre.className = "code-preview";
+      pre.append(code);
+      state.body.replaceChildren(pre);
+    }
+  }
+
+  function applyFilter(state, value) {
+    const needle = value.trim().toLowerCase();
+    const nodes = state.tree.querySelectorAll(".file-node");
+    nodes.forEach((node) => {
+      const path = node.dataset.path?.toLowerCase() || "";
+      node.hidden = Boolean(needle) && !path.includes(needle);
+    });
+  }
+
+  async function mountExplorer(element) {
+    const manifestUrl = element.dataset.manifest;
+    const state = {
+      tree: element.querySelector("[data-file-tree]"),
+      status: element.querySelector("[data-tree-status]"),
+      filter: element.querySelector("[data-file-filter]"),
+      title: element.querySelector("[data-preview-title]"),
+      type: element.querySelector("[data-preview-type]"),
+      empty: element.querySelector("[data-preview-empty]"),
+      body: element.querySelector("[data-preview-body]")
+    };
+
+    const response = await fetch(manifestUrl);
+    const manifest = await response.json();
+
+    if (manifest.error) {
+      state.status.textContent = `同步失败: ${manifest.error}`;
+      return;
+    }
+
+    const files = manifest.files || [];
+    const previewable = files.filter((file) => file.preview);
+    state.status.textContent = `${manifest.fileCount} 个文件，${manifest.previewCount} 个可预览`;
+    renderTreeNode(createTree(files), state.tree, state);
+    state.filter.addEventListener("input", (event) => applyFilter(state, event.target.value));
+
+    const featured = (manifest.featuredPaths || [])
+      .map((filePath) => previewable.find((file) => file.path === filePath))
+      .find(Boolean);
+    const readme = previewable.find((file) => /(^|\/)readme\.md$/i.test(file.path));
+    const first = featured || readme || previewable[0];
+    if (first) await selectFile(first, state);
+  }
+
+  document.querySelectorAll("[data-project-explorer]").forEach((element) => {
+    mountExplorer(element).catch((error) => {
+      const status = element.querySelector("[data-tree-status]");
+      status.textContent = `读取失败: ${error.message}`;
+    });
+  });
+</script>

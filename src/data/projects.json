@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "genqc",
+    "title": "genQC",
+    "kind": "repository",
+    "repo": "FA-T-T/genQC",
+    "branch": "main",
+    "sourceUrl": "https://github.com/FA-T-T/genQC",
+    "summary": "Generative Quantum Circuits. This is the main public repository for the current quantum research line.",
+    "focus": "Quantum circuits, generative modeling, research prototypes",
+    "featuredPaths": ["README.md", "requirements.txt", "environment.yml", "setup.py"],
+    "tags": ["quantum", "research", "repository"]
+  },
+  {
+    "slug": "vqls-prototype",
+    "title": "vqls-prototype",
+    "kind": "repository",
+    "repo": "FA-T-T/vqls-prototype",
+    "branch": "main",
+    "sourceUrl": "https://github.com/FA-T-T/vqls-prototype",
+    "summary": "A compact Qiskit-based VQLS prototype, useful as a small example project with runnable source files.",
+    "focus": "VQLS, Qiskit, prototype workflow",
+    "featuredPaths": ["README.md", "requirements.txt", "main.py"],
+    "tags": ["VQLS", "Qiskit", "prototype"]
+  },
+  {
+    "slug": "variational-quantum-linear-solver",
+    "title": "Variational Quantum Linear Solver",
+    "kind": "repository",
+    "repo": "FA-T-T/Variational-Quantum-Linear-Solver",
+    "branch": "main",
+    "sourceUrl": "https://github.com/FA-T-T/Variational-Quantum-Linear-Solver",
+    "summary": "A public VQLS repository that can be browsed as an independent project from the personal site.",
+    "focus": "Variational quantum algorithms and linear systems",
+    "featuredPaths": ["README.md", "requirements.txt"],
+    "tags": ["VQA", "linear solver", "repository"]
+  },
+  {
+    "slug": "quantum-computing",
+    "title": "Quantum-Computing",
+    "kind": "repository",
+    "repo": "FA-T-T/Quantum-Computing",
+    "branch": "master",
+    "sourceUrl": "https://github.com/FA-T-T/Quantum-Computing",
+    "summary": "A broader public notebook and note repository for quantum computing material.",
+    "focus": "Quantum computing notes, examples, and experiments",
+    "featuredPaths": ["README.md"],
+    "tags": ["quantum", "notes", "examples"]
+  }
+]

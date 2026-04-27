@@ -1,0 +1,35 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { formatEntryDate, loadMarkdownEntries, type MarkdownModule, type WritingEntry } from "../../lib/writing";
+
+export async function getStaticPaths() {
+  const posts = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../content/blog/**/*.md"), "blog");
+  return posts.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props as { entry: WritingEntry };
+const Content = entry.Component;
+const formattedDate = entry.data.date ? formatEntryDate(entry.data.date, "long") : "";
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description} bodyClass="blog-page" useMath={entry.data.use_math}>
+  <main class="article-main">
+    <article class="article-shell reveal">
+      <a class="back-link" href="/blog/">返回博客</a>
+      <header class="article-header">
+        <p class="eyebrow">Blog{formattedDate && ` / ${formattedDate}`}</p>
+        <h1 class="article-title">{entry.data.title}</h1>
+        {entry.data.deck && <p class="article-deck">{entry.data.deck}</p>}
+      </header>
+      <div class="article-meta-row">
+        {entry.data.tags.map((tag) => <span class="meta-pill">{tag}</span>)}
+      </div>
+      <div class="article-body">
+        <Content />
+      </div>
+    </article>
+  </main>
+</BaseLayout>

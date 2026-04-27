@@ -1,0 +1,172 @@
+---
+import ProjectCard from "@components/ProjectCard.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import projects from "@data/projects.json";
+import { site } from "@data/site";
+
+const publications = [
+  {
+    year: "2025",
+    title: "HiQC: hybrid quantum classical deep learning with parameter efficient quantum modules",
+    venue: "Quantum Machine Intelligence",
+    link: ""
+  },
+  {
+    year: "2024",
+    title: "Energy Efficiency of Wireless-Powered Cell-Free mMIMO With Hardware Impairments",
+    venue: "IEEE Transactions on Communications",
+    link: "http://dx.doi.org/10.1109/tcomm.2024.3369724"
+  },
+  {
+    year: "2023",
+    title: "Energy-Efficient Federated Learning Over Cell-Free IoT Networks: Modeling and Optimization",
+    venue: "IEEE Internet of Things Journal",
+    link: "https://doi.org/10.1109/JIOT.2023.3273619"
+  },
+  {
+    year: "2022",
+    title: "A Fault-Tolerant Transmission Scheme in SDN-Based Industrial IoT over Fiber-Wireless Networks",
+    venue: "Entropy",
+    link: "http://dx.doi.org/10.3390/e24020157"
+  },
+  {
+    year: "2022",
+    title: "Cell-Free Massive MIMO with Energy-Efficient Downlink Operation in Industrial IoT",
+    venue: "Mathematics",
+    link: "https://doi.org/10.3390/math10101687"
+  }
+];
+
+const researchInterests = [
+  "Quantum computing and parameterized quantum circuits",
+  "Hybrid quantum-classical models",
+  "Optimization and trainability of deep variational models",
+  "Structural conditions under which optimization remains informative"
+];
+
+const education = [
+  {
+    period: "2024 - expected 2028",
+    degree: "Engineering Doctorate in Electronic Information",
+    school: "School of Electronic Science and Engineering, Southeast University",
+    detail: "Currently enrolled."
+  },
+  {
+    period: "Master's",
+    degree: "Information and Communication Engineering",
+    school: "School of Information Science and Technology, Nantong University",
+    detail: "Research on physical-layer resource allocation for wireless communication and federated learning."
+  },
+  {
+    period: "Bachelor's",
+    degree: "Electronic Science and Technology",
+    school: "School of Information Science and Technology, Nantong University",
+    detail: ""
+  }
+];
+---
+
+<BaseLayout title="Academic Homepage" description={site.description} bodyClass="home-page academic-home">
+  <main>
+    <section class="academic-hero reveal">
+      <aside class="profile-card academic-profile">
+        <img class="profile-photo" src="/images/avatar.gif" alt="Taotao Zhao" />
+        <h1>Taotao Zhao</h1>
+        <p>{site.profileLine}</p>
+        <div class="profile-links">
+          <a href={site.scholar} target="_blank" rel="noreferrer">Google Scholar</a>
+          <a href={site.orcid} target="_blank" rel="noreferrer">ORCID</a>
+          <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </aside>
+
+      <div class="academic-intro">
+        <p class="eyebrow">Academic Homepage</p>
+        <h2>Taotao Zhao</h2>
+        <p class="affiliation">{site.affiliation}</p>
+        <p>
+          My work is broadly concerned with quantum computing, optimization, and learning systems. Recent interests center on parameterized quantum circuits, hybrid quantum-classical models, and the structural conditions under which optimization remains informative.
+        </p>
+        <p>
+          Earlier work studied optimization in wireless-powered cell-free massive MIMO, federated learning over IoT networks, and reliability in industrial communication systems. Across these topics, the recurring question is how system structure changes what can be optimized.
+        </p>
+      </div>
+    </section>
+
+    <section id="education" class="section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Education</p>
+          <h2>Education</h2>
+        </div>
+      </div>
+      <div class="education-list">
+        {
+          education.map((item) => (
+            <article class="education-row">
+              <span>{item.period}</span>
+              <div>
+                <strong>{item.degree}</strong>
+                <p>{item.school}</p>
+                {item.detail && <em>{item.detail}</em>}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="interests" class="section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Research</p>
+          <h2>Research Interests</h2>
+        </div>
+      </div>
+      <div class="interest-list">
+        {researchInterests.map((interest) => <article>{interest}</article>)}
+      </div>
+    </section>
+
+    <section id="publications" class="section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Publications</p>
+          <h2>Selected Publications</h2>
+        </div>
+      </div>
+      <div class="publication-list">
+        {
+          publications.map((publication) => (
+            publication.link ? (
+              <a class="publication-row" href={publication.link} target="_blank" rel="noreferrer">
+                <span>{publication.year}</span>
+                <strong>{publication.title}</strong>
+                <em>{publication.venue}</em>
+              </a>
+            ) : (
+              <article class="publication-row">
+                <span>{publication.year}</span>
+                <strong>{publication.title}</strong>
+                <em>{publication.venue}</em>
+              </article>
+            )
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="repositories" class="section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Repositories</p>
+          <h2>Repositories</h2>
+        </div>
+        <a class="note-index-link" href="/projects/">Open Project Browser</a>
+      </div>
+      <div class="project-grid">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

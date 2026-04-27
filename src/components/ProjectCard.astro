@@ -1,0 +1,25 @@
+---
+interface Project {
+  slug: string;
+  title: string;
+  kind: string;
+  summary: string;
+  focus: string;
+  tags?: string[];
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+---
+
+<a class="project-card" href={`/projects/${project.slug}/`}>
+  <span class="card-kicker">{project.kind}</span>
+  <h3>{project.title}</h3>
+  <p>{project.summary}</p>
+  <div class="tag-row" aria-label="Project tags">
+    {(project.tags ?? []).slice(0, 3).map((tag) => <span>{tag}</span>)}
+  </div>
+</a>

@@ -1,0 +1,45 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import ProjectExplorer from "@components/ProjectExplorer.astro";
+import projects from "@data/projects.json";
+
+export function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project }
+  }));
+}
+
+const { project } = Astro.props;
+---
+
+<BaseLayout title={project.title} description={project.summary} bodyClass="projects-page">
+  <main class="mac-main">
+    <a class="back-link" href="/projects/">返回项目目录</a>
+    <section class="project-hero reveal">
+      <div>
+        <p class="eyebrow">{project.kind}</p>
+        <h1 class="article-title">{project.title}</h1>
+        <p class="article-deck">{project.summary}</p>
+        <div class="article-meta-row">
+          <span class="article-meta-pill">{project.repo}</span>
+          <span class="article-meta-pill">{project.branch}</span>
+          {project.tags.map((tag) => <span class="article-meta-pill">{tag}</span>)}
+        </div>
+      </div>
+      <aside class="fact-panel">
+        <div class="fact-list">
+          <article>
+            <span>项目焦点</span>
+            <strong>{project.focus}</strong>
+          </article>
+          <article>
+            <span>源仓库</span>
+            <strong>{project.sourceUrl}</strong>
+          </article>
+        </div>
+      </aside>
+    </section>
+    <ProjectExplorer project={project} />
+  </main>
+</BaseLayout>

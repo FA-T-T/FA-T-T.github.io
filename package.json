@@ -1,0 +1,23 @@
+{
+  "name": "fattt-personal-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "node scripts/sync-projects.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
+    "astro": "^6.1.9",
+    "dompurify": "^3.3.0",
+    "marked": "^17.0.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "typescript": "^5.9.3"
+  }
+}

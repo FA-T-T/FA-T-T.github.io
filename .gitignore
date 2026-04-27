@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+npm-debug.log*
+public/project-data/
+.npm-cache/
+IREADME.md

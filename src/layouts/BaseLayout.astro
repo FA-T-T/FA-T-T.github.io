@@ -1,0 +1,120 @@
+---
+import { site } from "@data/site";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  useMath?: boolean;
+  bodyClass?: string;
+}
+
+const {
+  title = site.title,
+  description = site.description,
+  useMath = false,
+  bodyClass = ""
+} = Astro.props;
+const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#10263a" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(Astro.url.pathname, site.url).toString()} />
+    <meta property="og:image" content={new URL("/images/avatar.gif", site.url).toString()} />
+    <title>{pageTitle}</title>
+    <link rel="icon" href="/images/favicon-32x32-next.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon-next.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    {
+      useMath && (
+        <>
+          <script is:inline>
+            {`
+              window.MathJax = {
+                tex: {
+                  inlineMath: [["$", "$"], ["\\\\(", "\\\\)"]],
+                  displayMath: [["$$", "$$"], ["\\\\[", "\\\\]"]],
+                  processEscapes: true
+                },
+                svg: {
+                  fontCache: "global"
+                }
+              };
+            `}
+          </script>
+          <script
+            is:inline
+            defer
+            src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"
+            integrity="sha384-KKWa9jJ1MZvssLeOoXG6FiOAZfAgmzsIIfw8BXwI9+kYm0lPCbC6yTQPBC00F1/L"
+            crossorigin="anonymous"
+          />
+        </>
+      )
+    }
+  </head>
+  <body class={bodyClass}>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="/">
+          <span class="brand-mark">TZ</span>
+          <span class="brand-copy">
+            <strong>{site.author}</strong>
+            <span>{site.affiliation}</span>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/">Home</a>
+          <a href="/#education">Education</a>
+          <a href="/#publications">Publications</a>
+          <a href="/projects/">Projects</a>
+          <a href="/blog/">Blog</a>
+          <a href="/notes/">Notes</a>
+          <a href={site.scholar} target="_blank" rel="noreferrer">Scholar</a>
+          <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+      </header>
+      <slot />
+      <footer class="site-footer">
+        <p>© Taotao Zhao. Academic homepage and project archive.</p>
+      </footer>
+    </div>
+    <script>
+      const revealElements = document.querySelectorAll(".reveal");
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            });
+          },
+          {
+            threshold: 0.12,
+            rootMargin: "0px 0px -32px 0px"
+          }
+        );
+
+        revealElements.forEach((element) => observer.observe(element));
+      } else {
+        revealElements.forEach((element) => element.classList.add("is-visible"));
+      }
+    </script>
+  </body>
+</html>

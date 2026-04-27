@@ -1,0 +1,37 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { formatEntryDate, loadMarkdownEntries, type MarkdownModule } from "../../lib/writing";
+
+const notes = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../content/notes/**/*.md"), "notes");
+---
+
+<BaseLayout title="Notes" description="Research note archive." bodyClass="notes-page">
+  <main class="paper-main">
+    <article class="paper-sheet reveal">
+      <p class="paper-kicker">Notes</p>
+      <h1>Research Notes</h1>
+      {
+        notes.length > 0 ? (
+          <div class="paper-note-list">
+            {notes.map((note) => (
+              <a class="paper-note" href={`/notes/${note.slug}/`}>
+                <span>{formatEntryDate(note.data.date)}</span>
+                <strong>{note.data.title}</strong>
+                <em>{note.data.description}</em>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <>
+            <p>
+              No public Markdown notes are listed yet. Add files under <code>src/content/notes/</code> and they will appear here.
+            </p>
+            <p>
+              The visual language here is intentionally closer to paper than dashboard: narrow measure, quiet margins, and text-first reading.
+            </p>
+          </>
+        )
+      }
+    </article>
+  </main>
+</BaseLayout>

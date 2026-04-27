@@ -1,0 +1,42 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { formatEntryDate, loadMarkdownEntries, type MarkdownModule } from "../../lib/writing";
+
+const posts = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../content/blog/**/*.md"), "blog");
+---
+
+<BaseLayout title="Blog" description="Technical blog archive." bodyClass="blog-page">
+  <main class="terminal-main">
+    <section class="terminal-window reveal">
+      <header class="terminal-titlebar">
+        <span></span>
+        <span></span>
+        <span></span>
+        <strong>blog@everylink.site</strong>
+      </header>
+      <div class="terminal-body">
+        <p class="terminal-line"><span>$</span> ls posts</p>
+        <h1>Blog</h1>
+        {
+          posts.length > 0 ? (
+            <div class="terminal-post-list">
+              {posts.map((post) => (
+                <a class="terminal-post" href={`/blog/${post.slug}/`}>
+                  <span>{formatEntryDate(post.data.date)}</span>
+                  <strong>{post.data.title}</strong>
+                  <em>{post.data.description}</em>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p>
+              No public Markdown posts are listed yet. Add files under <code>src/content/blog/</code> and they will appear here.
+            </p>
+          )
+        }
+        <p class="terminal-line"><span>$</span> cat ../../templates/content-template.md</p>
+        <a class="terminal-link" href="/projects/">open projects</a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
