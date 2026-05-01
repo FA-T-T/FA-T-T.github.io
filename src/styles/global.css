@@ -10,6 +10,9 @@
   --amber: #9b6a17;
   --shadow: 0 10px 26px rgba(23, 32, 42, 0.07);
   --max-width: 1180px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, "Times New Roman", Times, serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 * {
@@ -25,7 +28,7 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background: var(--bg);
-  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 a {
@@ -72,7 +75,7 @@ input {
   border-radius: 8px;
   background: var(--surface);
   color: var(--blue);
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-weight: 700;
 }
 
@@ -124,7 +127,7 @@ main {
 .section-heading h2,
 .article-title {
   margin: 0;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   line-height: 1.08;
   font-weight: 700;
 }
@@ -265,7 +268,7 @@ main {
 .metric-value {
   display: block;
   color: var(--ink);
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 1.8rem;
 }
 
@@ -347,7 +350,7 @@ main {
 
 .agenda-index {
   color: var(--amber);
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 2rem;
 }
 
@@ -457,7 +460,7 @@ main {
 
 .article-body h2 {
   margin: 30px 0 12px;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 1.55rem;
   line-height: 1.2;
 }
@@ -511,7 +514,7 @@ main {
   border-radius: 6px;
   background: var(--surface-soft);
   color: var(--ink);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
 }
 
@@ -522,7 +525,7 @@ main {
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f8faf9;
+  background: var(--surface-soft);
 }
 
 .article-body pre code,
@@ -566,7 +569,7 @@ main {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .article-nav {
@@ -795,7 +798,7 @@ main {
 
 .academic-profile h1 {
   margin: 18px 0 8px;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   line-height: 1.1;
 }
@@ -824,7 +827,7 @@ main {
 
 .academic-intro h2 {
   margin: 0;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 3.3rem;
   line-height: 1.05;
 }
@@ -870,7 +873,7 @@ main {
 
 .education-row span {
   color: var(--green);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -995,13 +998,13 @@ main {
 .terminal-titlebar strong {
   margin-left: 8px;
   color: var(--muted);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.86rem;
 }
 
 .terminal-body {
   padding: 34px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
 }
 
 .terminal-body h1 {
@@ -1102,7 +1105,7 @@ main {
 
 .paper-sheet h1 {
   margin: 0 0 22px;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 2.7rem;
 }
 
@@ -1133,7 +1136,7 @@ main {
 
 .paper-note span {
   color: var(--amber);
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -1157,7 +1160,7 @@ main {
 
 .paper-content h2 {
   margin: 32px 0 10px;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display);
   font-size: 1.5rem;
 }
 
@@ -1187,7 +1190,7 @@ main {
 }
 
 .paper-content code {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
 }
 
 .paper-content blockquote {
