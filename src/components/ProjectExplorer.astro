@@ -21,10 +21,10 @@ const { project } = Astro.props;
       <strong>{project.repo}</strong>
     </div>
     <label class="filter-field">
-      <span>筛选文件</span>
+      <span>Filter files</span>
       <input data-file-filter type="search" placeholder="README, .py, .tex, .pdf" />
     </label>
-    <div class="tree-status" data-tree-status>正在读取项目清单...</div>
+    <div class="tree-status" data-tree-status>Reading project manifest...</div>
     <nav class="file-tree" data-file-tree aria-label="Project files"></nav>
   </aside>
   <article class="file-preview" aria-live="polite">
@@ -33,7 +33,7 @@ const { project } = Astro.props;
         <span class="card-kicker" data-preview-type>preview</span>
         <h2 data-preview-title>{project.title}</h2>
       </div>
-      <a class="source-link" href={project.sourceUrl} target="_blank" rel="noreferrer">打开仓库</a>
+      <a class="source-link" href={project.sourceUrl} target="_blank" rel="noreferrer">Open repository</a>
     </header>
     <div class="preview-empty" data-preview-empty>
       <p>{project.summary}</p>
@@ -154,7 +154,7 @@ const { project } = Astro.props;
     state.type.textContent = file.extension || "file";
     state.empty.hidden = true;
     state.body.hidden = false;
-    state.body.innerHTML = `<div class="loading-line">正在读取 ${file.path}</div>`;
+    state.body.innerHTML = `<div class="loading-line">Reading ${file.path}</div>`;
     state.tree.querySelectorAll(".file-node").forEach((node) => {
       node.classList.toggle("is-active", node.dataset.path === file.path);
     });
@@ -165,7 +165,7 @@ const { project } = Astro.props;
     }
 
     if (!file.cachedPath) {
-      state.body.innerHTML = `<p class="preview-note">这个文件没有进入静态预览缓存，可以从原仓库打开。</p>`;
+      state.body.innerHTML = `<p class="preview-note">This file is not in the static preview cache. Open it from the source repository.</p>`;
       return;
     }
 
@@ -214,13 +214,13 @@ const { project } = Astro.props;
     const manifest = await response.json();
 
     if (manifest.error) {
-      state.status.textContent = `同步失败: ${manifest.error}`;
+      state.status.textContent = `Sync failed: ${manifest.error}`;
       return;
     }
 
     const files = manifest.files || [];
     const previewable = files.filter((file) => file.preview);
-    state.status.textContent = `${manifest.fileCount} 个文件，${manifest.previewCount} 个可预览`;
+    state.status.textContent = `${manifest.fileCount} files, ${manifest.previewCount} previewable`;
     renderTreeNode(createTree(files), state.tree, state);
     state.filter.addEventListener("input", (event) => applyFilter(state, event.target.value));
 
@@ -235,7 +235,7 @@ const { project } = Astro.props;
   document.querySelectorAll("[data-project-explorer]").forEach((element) => {
     mountExplorer(element).catch((error) => {
       const status = element.querySelector("[data-tree-status]");
-      status.textContent = `读取失败: ${error.message}`;
+      status.textContent = `Read failed: ${error.message}`;
     });
   });
 </script>
