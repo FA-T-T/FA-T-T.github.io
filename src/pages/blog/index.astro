@@ -5,18 +5,18 @@ import { formatEntryDate, loadMarkdownEntries, type MarkdownModule } from "../..
 const posts = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../content/blog/**/*.md"), "blog");
 ---
 
-<BaseLayout title="Blog" description="Technical blog archive." bodyClass="blog-page">
+<BaseLayout title="博客" description="技术博客归档。" bodyClass="blog-page">
   <main class="terminal-main">
     <section class="terminal-window reveal">
       <header class="terminal-titlebar">
         <span></span>
         <span></span>
         <span></span>
-        <strong>blog@everylink.site</strong>
+        <strong>博客@everylink.site</strong>
       </header>
       <div class="terminal-body">
-        <p class="terminal-line"><span>$</span> ls posts</p>
-        <h1>Blog</h1>
+        <p class="terminal-line"><span>$</span> ls 文章</p>
+        <h1>博客</h1>
         {
           posts.length > 0 ? (
             <div class="terminal-post-list">
@@ -30,12 +30,12 @@ const posts = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../
             </div>
           ) : (
             <p>
-              No public Markdown posts are listed yet. Add files under <code>src/content/blog/</code> and they will appear here.
+              还没有公开的 Markdown 博客。把文章放到 <code>src/content/blog/</code> 后会显示在这里。
             </p>
           )
         }
-        <p class="terminal-line"><span>$</span> cat ../../templates/content-template.md</p>
-        <a class="terminal-link" href="/projects/">open projects</a>
+        <p class="terminal-line"><span>$</span> cat ../../模板/内容模板.md</p>
+        <a class="terminal-link" href="/projects/">打开项目</a>
       </div>
     </section>
   </main>

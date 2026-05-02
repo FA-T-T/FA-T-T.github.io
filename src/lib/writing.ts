@@ -1,5 +1,6 @@
 export type MarkdownModule = {
   default: any;
+  getHeadings?: () => Promise<MarkdownHeading[]>;
   frontmatter: {
     title?: string;
     description?: string;
@@ -11,9 +12,16 @@ export type MarkdownModule = {
   };
 };
 
+export type MarkdownHeading = {
+  depth: number;
+  slug: string;
+  text: string;
+};
+
 export type WritingEntry = {
   slug: string;
   Component: any;
+  headings: MarkdownHeading[];
   data: {
     title: string;
     description: string;
@@ -46,9 +54,11 @@ export async function loadMarkdownEntries(loaders: MarkdownLoaders, collection: 
     Object.entries(loaders).map(async ([filePath, load]) => {
       const module = await load();
       const data = module.frontmatter ?? {};
+      const headings = typeof module.getHeadings === "function" ? await module.getHeadings() : [];
       return {
         slug: slugFromPath(filePath, collection),
         Component: module.default,
+        headings,
         data: {
           title: data.title ?? "Untitled",
           description: data.description ?? "",
@@ -72,10 +82,10 @@ export async function loadMarkdownEntries(loaders: MarkdownLoaders, collection: 
 }
 
 export function formatEntryDate(date?: Date, style: "short" | "long" = "short") {
-  if (!date) return "undated";
-  return new Intl.DateTimeFormat("en", {
+  if (!date) return "未注明日期";
+  return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
-    month: style === "long" ? "long" : "short",
+    month: style === "long" ? "long" : "2-digit",
     day: "2-digit"
   }).format(date);
 }

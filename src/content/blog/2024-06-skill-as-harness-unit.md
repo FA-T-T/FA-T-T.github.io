@@ -1,52 +1,52 @@
 ---
-title: "Part 4 | Skill as a Harness Unit: Definition, Structure, and a Minimal YAML Example"
-description: 'The value of a skill is not the name. It is the boundary that packages prompts, tools, evidence, scripts, assets, outputs, and failures into a versioned execution asset.'
-deck: 'Prompt templates help with one call. Tool schemas help with external actions. Long-term maintenance needs a larger unit that makes a repeated task portable, testable, and owned.'
+title: "第 4 篇 | 技能作为执行框架单元：定义、结构与最小 YAML 示例"
+description: "技能的价值不在名字，而在边界：它把提示词、工具、证据、脚本、资产、输出和失败处理包装成一个有版本的执行资产。"
+deck: "提示词模板能管一次调用。工具结构约束能管外部动作。长期维护需要更大的单位，让重复任务可以迁移、测试和负责。"
 date: 2024-06-18
 tags:
-  - harness
-  - skills
-  - yaml
+  - 执行框架
+  - 技能
+  - 配置
 use_math: false
 draft: false
 ---
 
-Once prompts, RAG, and function calling enter the same system, a new problem appears. The pieces are scattered. Prompts live in a shared document. Retrieval settings live on a service. Tool schemas live in a repository. Evaluation samples live in a spreadsheet. A helper script sits on one engineer's laptop. The workflow looks intelligent when the person who assembled it is present. It becomes fragile when the workflow must be moved, audited, repeated, or handed to someone else.
+当提示词、RAG 和函数调用进入同一个系统后，一个新问题出现了：零件散得到处都是。提示词在共享文档里。检索设置在服务里。工具 schema 在仓库里。评估样例在表格里。辅助脚本在某个工程师电脑上。组装者在场时，工作流看起来很聪明；一旦要迁移、审计、重复或交给别人，它就变得脆弱。
 
-I call the missing boundary a skill. The word is less important than the boundary. A skill is not a prompt, not a tool, and not a workflow engine. It is the smallest maintainable unit for a class of tasks. A good skill says when it should be invoked, what instructions apply, which references may be read, which scripts may run, which tools may be called, what output must look like, and how failure should be reported. It moves "knowing how to do this" out of a person's head and into files under version control.
+我把缺失的边界叫作技能。词本身不重要，边界才重要。技能不是提示词，不是工具，也不是工作流引擎。它是某一类任务的最小可维护单元。一个好技能会说明什么时候应该触发，哪些指令生效，哪些参考材料可以读取，哪些脚本可以运行，哪些工具可以调用，输出应该是什么样，失败时如何报告。它把“知道怎么做这件事”从人的脑子里搬到版本控制下的文件里。
 
-Public product shapes have moved in the same direction. Claude's [Skills overview](https://claude.com/docs/skills/overview) describes skills as directories containing instructions, scripts, and resources that are loaded dynamically for specific tasks. Anthropic's launch post describes skills as composable, portable, efficient packages of instructions, code, and resources. The [Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18) standardizes another side of the problem: connecting model applications to external context and tools. These are not the same abstraction. Together they show the same pressure. A single prompt is too small for durable work.
+公开产品形态也在朝这个方向走。Claude 的 [Skills 文档](https://claude.com/docs/skills/overview) 把技能描述成包含指令、脚本和资源的目录，并在具体任务中动态加载。Anthropic 的发布文章也把技能称为可组合、可迁移、高效的指令、代码和资源包。[Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18) 则标准化了另一个侧面：让模型应用连接外部上下文和工具。它们不是同一个抽象，但都说明一件事：单个提示词太小，撑不起可维护工作。
 
-## The Missing Boundary Is Maintenance
+## 缺失的边界叫维护
 
-A prompt template can be useful. It can constrain output, define examples, and reduce drift. But it usually covers only model input. When the task also needs evidence, scripts, file formats, error recovery, style rules, and quality checks, the template swells. Either it becomes a giant prompt, or it hides critical steps in external convention. The first wastes context. The second cannot be reproduced.
+提示词模板当然有用。它能约束输出，定义示例，降低漂移。但它通常只覆盖模型输入。当任务还需要证据、脚本、文件格式、错误恢复、风格规则和质量检查时，模板会膨胀。要么变成巨型提示词，要么把关键步骤藏在外部约定里。前者浪费上下文，后者无法复现。
 
-A skill is not a longer prompt. It is a way to put task knowledge into the right medium. Stable execution rules belong in `SKILL.md`. Long reference material belongs in `references/`, loaded only when needed. Deterministic operations belong in `scripts/`, where code can parse tables, render documents, count fields, or run checks instead of asking the model to improvise. Templates, sample files, images, and brand assets belong in `assets/`. The model no longer needs to ingest the whole task universe at once. The runtime can see what each file is responsible for.
+技能不是更长的提示词，而是把任务知识放回正确介质。稳定执行规则放在 `SKILL.md`。长参考材料放在 `references/`，只在需要时加载。确定性操作放在 `scripts/`，让代码解析表格、渲染文档、统计字段、运行检查，而不是让模型即兴表演。模板、样例文件、图片和品牌资产放在 `assets/`。模型不再需要一次吞下整个任务宇宙。运行时也能看清每个文件负责什么。
 
-This is ordinary software engineering. We do not put all business logic into one giant function. We should not put all task knowledge into one giant prompt. Software needs module boundaries. AI harnesses need them too.
+这只是普通软件工程。我们不会把所有业务逻辑塞进一个巨型函数。也不该把所有任务知识塞进一个巨型提示词。软件需要模块边界。AI 执行框架也需要。
 
-## A Skill Must First Answer When It Applies
+## 技能首先要回答何时适用
 
-Many skill designs fail because they explain how to act but not when to act. If activation is vague, routing becomes unstable. A code-review skill described as "helps improve code quality" can match almost any programming task. A stronger description says it should be used when the user asks for review, PR inspection, bug risk, or regression analysis; it should not be used when the user simply asks to implement a new feature, unless review is part of the request.
+很多技能设计失败，是因为它们解释了怎么做，却没解释什么时候做。如果触发条件模糊，路由就会不稳定。一个代码评审技能如果写成“帮助提升代码质量”，几乎会匹配所有编程任务。更强的描述应该说明：当用户要求评审、PR 检查、bug 风险或回归分析时使用；如果用户只是要求实现新功能，不应自动使用，除非评审是请求的一部分。
 
-The activation description is the entrance contract. It decides whether the runtime loads the package. Too broad, and it pollutes unrelated work. Too narrow, and the system fails to use it. Negative conditions matter because they reduce false positives. "Use for existing Markdown articles that need revision or audit, not for casual title brainstorming" is more useful than "helps with writing."
+激活描述是入口契约。它决定运行时是否加载这个包。太宽，会污染无关任务。太窄，会错过应当使用的情况。负条件同样重要，因为它们减少误触发。“用于已有 Markdown 文章的修订和审计，不用于随手起标题”，比“帮助写作”有用得多。
 
-A minimal platform-neutral shape could look like this:
+一个平台无关的最小形状可以长这样：
 
 ```yaml
 name: wiki-quick-view
 version: 1.0.0
 description: >
-  Summarize a Wikipedia-like topic from retrieved evidence.
-  Use only when the user asks for a sourced quick overview.
-  Do not use for legal, medical, or current-news questions.
+  从检索证据中总结一个百科式主题。
+  只在用户要求带来源的快速概览时使用。
+  不用于法律、医疗或实时新闻问题。
 
 instructions:
   system: |
-    Answer only from retrieved snippets.
-    If snippets conflict, name the conflict instead of choosing silently.
+    只根据检索片段回答。
+    如果片段冲突，就命名冲突，不要暗中选择。
   task: |
-    Produce a short overview with citations and open questions.
+    产出简短概览、引用和未解决问题。
 
 tools:
   - name: search_wikipedia
@@ -65,90 +65,75 @@ context:
     fields: [title, snippet, url, retrieved_at]
 
 output:
-  type: object
   required: [summary, citations, open_questions]
-  properties:
-    summary:
-      type: array
-      items:
-        type: object
-        required: [topic, paragraph, citation_ids]
-    citations:
-      type: array
-      items:
-        type: object
-        required: [id, url, retrieved_at]
-    open_questions:
-      type: array
-      items: { type: string }
 ```
 
-This is not a proposed universal standard. It shows the responsibilities that need to travel together. Activation defines the use case. Instructions constrain model behavior. Tools constrain actions. Context rules define evidence injection. Output defines what another system can parse. Remove any of those, and the skill becomes documentation rather than an execution asset.
+这不是要提出一个通用标准，而是展示需要一起移动的责任。激活定义用例。指令约束模型。工具约束动作。上下文规则定义证据注入。输出定义另一个系统如何解析。少掉任何一项，技能就更像文档，而不是执行资产。
 
-## Scripts Are Where Determinism Should Land
+## 脚本承接确定性工作
 
-AI systems often ask the model to do things code should do. Count rows. Parse CSV. Validate frontmatter. Render a PDF. Check whether a Markdown file has required fields. Compress images. The model can describe those operations, but the execution should be deterministic.
+AI 系统常让模型做代码该做的事。数行数。解析 CSV。验证 frontmatter。渲染 PDF。检查 Markdown 是否有必填字段。压缩图片。模型可以描述这些操作，但执行应当是确定性的。
 
-The `scripts/` directory is the landing zone. A script should do one clear job, take explicit inputs, return explicit outputs, and fail with readable errors. A quality gate checks frontmatter, length, forbidden phrases, and evidence density. A rendering script exports a document to images. A data script reads CSV and returns statistics. The model reads the result and makes judgment; it does not need to invent the calculation.
+`scripts/` 目录就是落点。脚本应该只做一件清楚的事，接收显式输入，返回显式输出，并用可读错误失败。质量门检查 frontmatter、长度、空泛表达和证据密度。渲染脚本把文档导出成图片。数据脚本读取 CSV 并返回统计量。模型读取结果并做判断，不需要发明计算过程。
 
-This changes the division of labor. Models are good at interpretation, synthesis, tradeoff, and fuzzy constraints. Scripts are good at exact parsing, conversion, counting, and repeatable validation. A skill bundles the two so that deterministic work does not become model theater, and scripts do not become orphaned tools nobody knows when to call.
+这改变了分工。模型擅长解释、综合、权衡和处理模糊约束。脚本擅长精确解析、转换、计数和可重复验证。技能把两者绑在一起，让确定性工作不变成模型表演，也让脚本不变成没人知道何时调用的孤儿工具。
 
-## References Protect Context Hygiene
+## 参考材料保护上下文卫生
 
-Reference material can be large: brand guides, legal rules, database schemas, API manuals, style guides. Putting all of it into the main prompt overloads the context. Leaving it outside the package makes the runtime guess which file matters.
+参考材料可能很大：品牌指南、法律规则、数据库 schema、API 手册、写作风格。把它们全放进主提示词会污染上下文。把它们放在包外，又让运行时猜哪个文件重要。
 
-References give a middle path. The main instruction says when to read which file. The details stay in separate documents. A document-processing skill can read `slides.md` for slide work, `contract-summary.md` for contract summaries, and `voice.md` for blog writing. The main prompt stays short. The model loads only what the task needs.
+References 给出中间路径。主指令只说明什么时候读哪个文件，细节留在独立文档里。一个文档处理技能可以在做幻灯片时读 `slides.md`，做合同摘要时读 `contract-summary.md`，写博客时读 `voice.md`。主提示词保持短小。模型只加载当前任务需要的部分。
 
-This is progressive disclosure. Claude's skill documentation explicitly frames skills this way: metadata is light, `SKILL.md` loads when relevant, and additional files are loaded when needed. The principle matters beyond any vendor. Context is a budget. A skill that loads every reference by default becomes a noise source.
+这就是渐进披露。Claude 的技能文档也明确强调这一点：metadata 很轻，`SKILL.md` 在相关时加载，额外文件在需要时加载。这个原则不属于任何单一供应商。上下文是预算。默认加载所有参考的技能，会变成噪声源。
 
-## Assets Prevent On-the-Fly Invention
+## 资产防止临场编造
 
-Some tasks need materials, not just rules. Slides need templates. Brand writing needs logos, palettes, and forbidden terms. Image generation needs references. Spreadsheet work needs sample files. Without assets, the model imagines. Imagination can be useful in creative tasks. It is a liability when consistency matters.
+有些任务需要材料，不只是规则。幻灯片需要模板。品牌写作需要 logo、色盘和禁用词。图像生成需要参考图。表格工作需要样例文件。没有资产，模型就会想象。想象在创意任务里有价值，在一致性任务里是风险。
 
-Putting assets inside the skill says that the task package contains not only "how to do it" but "what to do it with." New users do not need to ask where the deck template lives. The runtime does not need to search the whole disk. Version control can record asset changes. If output changes because the template changed, the diff can explain it.
+把资产放进技能，等于说任务包不仅包含“怎么做”，还包含“用什么做”。新用户不用问模板在哪里。运行时不用搜索整个磁盘。版本控制能记录资产变化。如果输出因为模板变化而变化，diff 能解释原因。
 
-This is not exotic. Software packages have fixtures, templates, and static resources. Skills bring the same discipline into model workflows.
+这不新鲜。软件包有 fixtures、templates 和 static resources。技能只是把同样纪律带进模型工作流。
 
-## The Main File Should Be Short and Hard
+## 主文件应该短而硬
 
-`SKILL.md` easily becomes a dumping ground. The author worries that the model may forget a rule, so every detail goes into the main file: background, examples, edge cases, scripts, style guidance, API notes, and failure handling. The model sees more text and less priority.
+`SKILL.md` 很容易变成垃圾场。作者担心模型忘规则，于是把背景、例子、边界条件、脚本说明、风格指南、API 备注和失败处理都塞进主文件。模型看到更多文字，反而看到更少优先级。
 
-The main file should be short and hard. It should name the skill, define activation, describe the workflow, point to references, point to scripts, define outputs, and state safety boundaries. It should work like an onboarding index, not an encyclopedia. Long material belongs one level away, in files that are loaded only when the task requires them.
+主文件应该短而硬。它命名技能，定义激活条件，描述工作流，指向参考，指向脚本，定义输出，说明安全边界。它应该像入门索引，而不是百科全书。长材料放在下一层，只在任务需要时加载。
 
-This is also what makes composition possible. A large, chatty skill cannot be easily loaded beside another skill. A compact skill can cooperate with routing, quality gates, and downstream workflows.
+这也让组合成为可能。一个巨大、啰嗦的技能很难和另一个技能一起加载。紧凑技能才能和路由、质量门、下游工作流协作。
 
-## Quality Gates Are Minimum Self-Respect
+## 质量门是最低自尊
 
-A stable skill should have a quality gate. A writing skill checks frontmatter, length, generic phrases, and evidence density. A code skill runs tests and lint. A document skill renders pages and checks layout. An image skill checks size and format. A research skill checks sources and unsupported claims. The gate does not need to be perfect. It needs to catch the common failures that should not reach the user.
+稳定技能应该有质量门。写作技能检查 frontmatter、长度、泛化套话和证据密度。代码技能跑测试和 lint。文档技能渲染页面并检查布局。图像技能检查尺寸和格式。研究技能检查来源和不支持的主张。质量门不必完美，但必须抓住那些不该交给用户的常见失败。
 
-Quality gates also force the author to define what "good enough" means. If a workflow has no gate, it still lives in the world of "looks fine." Looks fine cannot be automated. Gates will have false positives. Those should be recorded and improved. The point is to create a checkable surface.
+质量门也迫使作者定义什么叫“够好”。没有门槛的工作流仍然停留在“看起来不错”。“看起来不错”不能自动化。质量门会有误报，误报应该被记录和改进。重点是创造一个可检查表面。
 
-## Examples Should Be Regression Cases
+## 示例应当是回归案例
 
-Examples in a skill are not tutorials first. They are boundary definitions. A writing skill should include evidence-thin cases, not just polished success. A spreadsheet skill should include missing columns and empty cells. An image skill should include reference constraints and forbidden elements.
+技能里的示例首先不是教程，而是边界定义。写作技能应该包含证据薄弱的案例，而不只是漂亮成稿。表格技能应该包含缺列和空单元格。图像技能应该包含参考约束和禁用元素。
 
-Good examples can become regression tests. Every skill change can run through them. The output does not need to match exactly, but the required properties should hold. This keeps examples from rotting into decorative documentation. Small sharp examples are better than one giant happy-path demo because they tell you what boundary they protect.
+好示例可以变成回归测试。每次改技能都跑一遍。输出不需要逐字一致，但要求属性应当成立。这让示例不至于腐烂成装饰性文档。几个小而尖的示例，通常胜过一个巨大的顺风演示，因为它们说得清自己保护哪条边界。
 
-## Installation and Discovery Are Design
+## 安装和发现也是设计
 
-A skill that cannot be installed, discovered, and smoke-tested is not portable. Directory name, `name`, description, dependency notes, test command, and sample input all belong to the design. The description is especially important because routing systems often read metadata before they read the full skill. A vague description makes the skill hard to select. A broad description makes it trigger too often.
+不能安装、发现和冒烟测试的技能，不是可迁移资产。目录名、`name`、描述、依赖说明、测试命令和样例输入，都属于设计。描述尤其重要，因为路由系统常先读 metadata，再读完整技能。模糊描述让技能难以选择。过宽描述让技能误触发。
 
-A new environment should be able to run a smoke test: files exist, scripts execute, dependencies are present, output paths are writable. Otherwise the first real task becomes the installation test. When that fails, the user cannot tell whether the skill logic is wrong or the environment is broken.
+新环境应该能跑一个冒烟测试：文件存在，脚本可执行，依赖齐全，输出路径可写。否则第一次真实任务就会变成安装测试。失败时，用户也分不清是技能逻辑错，还是环境坏。
 
-## Skills Rot
+## 技能会腐烂
 
-A skill stored as files is not automatically durable. Model behavior changes. APIs change. Dependencies expire. References go stale. User needs drift. A skill that has not been run in six months may still load but produce weaker output, misroute tasks, or ignore new failure modes.
+技能存成文件，不等于自动耐用。模型行为会变。API 会变。依赖会过期。参考资料会陈旧。用户需求会漂。半年没跑过的技能可能仍能加载，却产出更弱结果、误路由任务、忽略新失败模式。
 
-Maintenance should be boring. Run the smoke test. Run representative examples. Check links. Check script dependencies. Read the quality gate. When a failure is fixed, add it to regression cases. A skill is closer to a software package than a document. Treating it as a document is how it rots.
+维护应该无聊。跑冒烟测试。跑代表性示例。检查链接。检查脚本依赖。读质量门。修复失败后，把失败加入回归案例。技能更像软件包，而不是文档。把它当文档，它就会烂。
 
-Bad skills have recognizable smells. The description is too broad. The main file is too long. There are no negative activation conditions. Deterministic checks are left to the model. Outputs are unstructured. Audits are absent. Permissions are unclear. Failure paths are not defined. These smells may not break a demo. They break scale.
+坏技能有明显气味：描述太宽，主文件太长，没有负触发条件，确定性检查交给模型，输出不结构化，审计缺席，权限不清，失败路径未定义。这些气味不一定破坏演示，但会破坏规模化使用。
 
-A mature skill treats failure as an output. If an article cannot be written, produce evidence gaps. If an experiment cannot run, produce an error report. If an image cannot be rendered, produce repair prompts. If publishing is blocked, produce a blocker list. A skill that only produces value on the happy path is still a demo.
+成熟技能会把失败也当输出。如果文章写不出来，就产出证据缺口。如果实验跑不动，就产出错误报告。如果图像渲染失败，就产出修复提示词。如果发布被阻塞，就产出阻塞清单。只能在顺风路径产生价值的技能，仍然只是演示。
 
-## Skill and MCP Are Adjacent, Not the Same
+## 技能和 MCP 相邻，但不是一回事
 
-MCP standardizes how model applications connect to tools, resources, and prompts. A skill packages task knowledge. The two fit together, but one does not replace the other. An MCP server can expose file access, search, or database queries. A skill can say how a blog-writing task should use evidence, when to read style guidance, which quality gate to run, and what audit file to produce.
+MCP 标准化的是模型应用如何连接工具、资源和提示词。技能包装的是任务知识。两者能配合，但不能互相替代。一个 MCP 服务可以暴露文件访问、搜索或数据库查询。一个技能可以说明博客写作任务该如何使用证据，什么时候读取风格指南，运行哪个质量门，产出什么审计文件。
 
-Connection without task strategy leaves the model with many tools and little guidance. Task strategy without connection leaves a nice runbook with no capability. The skill sits between the user goal and the lower-level tools. It presents a task-level ability upward and calls tools, scripts, and references downward.
+只有连接而没有任务策略，模型会拥有许多工具却缺少指导。只有任务策略而没有连接，得到的是好看的操作手册却没有能力。技能位于用户目标和底层工具之间。它向上呈现任务级能力，向下调用工具、脚本和参考材料。
 
-That is the real value. A skill turns implicit know-how into explicit boundaries. If a process runs once, do not over-package it. If it runs repeatedly, moves between people, needs rollback, or must survive model changes, package it. Not because "skill" is a magic term. Because repeatable work needs a unit that can be owned.
+这才是真正价值。技能把隐性 know-how 变成显式边界。如果一个流程只跑一次，不必过度包装。如果它会重复运行、跨人交接、需要回滚，或必须经受模型变化，就应该包装。不是因为“技能”这个词神奇，而是因为可重复工作需要一个可负责的单位。

@@ -1,29 +1,29 @@
 ---
-title: "Part 5 | Skill Routing and Composition: Scheduling, Overrides, and Conflict Resolution"
-description: 'Once skills multiply, the hard problem moves from writing new capabilities to deciding when to use them, how to connect them, and who can override whom.'
-deck: 'One skill gives a task a reproducible boundary. Many skills create a scheduling problem. Without routing, state envelopes, and conflict rules, the system becomes implicit global state.'
+title: "第 5 篇 | 技能路由与组合：调度、覆盖与冲突解决"
+description: "当技能越来越多，难题就从写新能力转向决定何时使用它们、如何连接它们，以及谁能覆盖谁。"
+deck: "一个技能给任务可复现的边界。很多技能会制造调度问题。没有路由、状态信封和冲突规则，系统就会退化成隐式全局状态。"
 date: 2025-03-12
 tags:
-  - skills
-  - routing
-  - orchestration
+  - 技能
+  - 路由
+  - 编排
 use_math: false
 draft: false
 ---
 
-When an AI harness has three skills, routing feels easy. Blog request, load the blog skill. Image request, load the image skill. Spreadsheet request, load the spreadsheet skill. Once the system has dozens, complexity changes shape. One user request can look like writing, research, code, audit, and publishing at the same time. Each skill brings its own instructions, references, tools, output formats, and safety boundaries. Without a routing layer, the system is not more capable. It is more likely to be torn apart by local rules.
+当一个 AI 执行框架只有三个技能时，路由看起来很容易。博客请求，加载博客技能。图片请求，加载图片技能。表格请求，加载表格技能。技能一多，复杂度就变形了。一个用户请求可能同时像写作、研究、代码、审计和发布。每个技能都带着自己的指令、参考、工具、输出格式和安全边界。没有路由层，系统不是更强，而是更容易被局部规则扯碎。
 
-Skill composition is not just "choose the closest skill." That is classification, and it is only the first layer. The harder question is execution semantics. Can two skills be loaded at once. Which rule wins. Can one skill's output become another skill's input. How long does a user override live. What happens when a low-risk writing skill wants speed and a high-risk publishing skill wants confirmation. If the runtime cannot answer those questions, skills become global side effects.
+技能组合不只是“选最像的技能”。那只是分类，而且只是第一层。更难的问题是执行语义。两个技能能不能同时加载。哪条规则获胜。一个技能的输出能不能成为另一个技能的输入。用户覆盖能活多久。低风险写作技能想要速度，高风险发布技能想要确认，两者冲突时怎么办。运行时如果回答不了这些问题，技能就会变成全局副作用。
 
-The claim here is narrow. Multi-skill systems do not need only a smarter intent classifier. They need a scheduling model: candidate scoring, execution graphs, state envelopes, override scope, conflict rules, replay, and explanations a user can challenge.
+这里的主张很窄。多技能系统不只需要更聪明的意图分类器，它需要调度模型：候选评分、执行图、状态信封、覆盖范围、冲突规则、回放和用户能质疑的解释。
 
-## Routing Cannot Be Only Semantic Match
+## 路由不能只靠语义相似
 
-Semantic match is necessary. "Expand this draft into a technical blog" should match a blog-writing skill. "Review this PR for bugs" should match a code-review skill. But semantic match only answers whether the request looks related. It does not answer whether the skill should run.
+语义匹配是必要的。“把这份草稿扩成技术博客”应匹配博客写作技能。“帮我评审这个 PR 的 bug 风险”应匹配代码评审技能。但语义匹配只回答请求看起来是否相关，不回答技能是否应该运行。
 
-A usable router looks at several signals. Task intent says what artifact the user wants. Input shape says whether the context contains files, images, tables, code, logs, or links. Risk says whether the skill may write files, call external services, modify a repository, or spend money. Cost says how much context, tool time, and external work the skill needs. History says whether the skill has succeeded on similar tasks. User constraints say whether a skill was requested or forbidden.
+可用的路由器会看几类信号。任务意图说明用户要什么产物。输入形状说明上下文里有没有文件、图片、表格、代码、日志或链接。风险说明技能是否会写文件、调用外部服务、修改仓库或花钱。成本说明技能需要多少上下文、工具时间和外部工作。历史说明技能在类似任务上是否成功。用户约束说明技能是否被点名或禁止。
 
-Those signals should not collapse into an unexplained score. The router should return candidates, reasons, confidence, and risk. Low-risk tasks may run the top candidate. High-risk tasks may ask for confirmation. Multi-step tasks may convert candidates into an execution graph.
+这些信号不应塌成一个不可解释分数。路由器应返回候选、理由、置信度和风险。低风险任务可以直接跑最高候选。高风险任务可能要确认。多步骤任务可以把候选转换成执行图。
 
 ```json
 {
@@ -32,14 +32,14 @@ Those signals should not collapse into an unexplained score. The router should r
     {
       "skill": "tech-geek-blog",
       "score": 0.91,
-      "reason": "The user asks to turn Markdown drafts into publishable technical blog posts.",
+      "reason": "用户要求把 Markdown 草稿改成可发布技术博客。",
       "risk": "write_files",
       "requires_confirmation": false
     },
     {
       "skill": "research-lit",
       "score": 0.43,
-      "reason": "Public evidence may be needed, but the task is not primarily a literature review.",
+      "reason": "可能需要公开证据，但任务主体不是文献综述。",
       "risk": "network_read",
       "requires_confirmation": false
     }
@@ -49,21 +49,21 @@ Those signals should not collapse into an unexplained score. The router should r
 }
 ```
 
-That object is more cumbersome than "use tech-geek-blog." It is also more debuggable. If an article later contains a factual error, the team can ask whether the router underweighted the evidence stage. If a file was modified unexpectedly, the risk tag can be inspected. Routing output should be part of the audit trail, not a hidden model impression.
+这个对象比“使用 tech-geek-blog”笨重，也更可调试。如果文章后来有事实错误，团队可以问路由是否低估了证据阶段。如果文件被意外修改，风险标签可以被检查。路由输出应该进入审计轨迹，而不是藏在模型印象里。
 
-## Composition Is Not Prompt Concatenation
+## 组合不是拼接提示词
 
-When several skills match, the worst move is to paste all their instructions into one context. That appears to preserve capability. In practice it creates instruction conflict and context pollution. One skill wants short conversational prose. Another wants proof-like rigor. One wants public-source verification. Another wants local-only operation. One wants JSON. Another wants Markdown. The model receives more rules and less priority.
+多个技能匹配时，最坏的做法是把它们的指令全贴进同一个上下文。看起来能力都保住了，实际制造的是指令冲突和上下文污染。一个技能要短而口语，一个技能要证明式严谨。一个要公开来源验证，一个要只用本地材料。一个要 JSON，一个要 Markdown。模型得到更多规则，却得到更少优先级。
 
-Composition needs an execution graph. A "rewrite these blog drafts" task can be split into evidence collection, structure planning, article rewrite, audit, quality check, and site build. The evidence phase can borrow research rules. The writing phase loads voice and structure rules. The quality phase runs a gate. The build phase only needs local commands. Each phase has inputs, outputs, and stop conditions. Not every rule needs to be active at every moment.
+组合需要执行图。一个“重写这些博客草稿”的任务可以拆成证据收集、结构规划、正文重写、审计、质量检查和站点构建。证据阶段借用研究规则。写作阶段加载声音和结构规则。质量阶段跑门禁。构建阶段只需要本地命令。每个阶段有输入、输出和停止条件。不是每条规则都要在每一刻激活。
 
-This is closer to a Unix pipeline than to one giant prompt. The top-level goal delegates to local controllers. Each controller acts within a time window. Its output enters state. The next phase reads what it needs. That is how composition avoids becoming a bag of instructions.
+这更像类 Unix 管道，而不是一个巨型提示词。顶层目标委托给局部控制器。每个控制器只在自己的时间窗口内行动。它的输出进入状态。下一阶段只读自己需要的字段。组合靠这种方式避免变成指令袋子。
 
-## State Envelopes Hold the System Together
+## 状态信封把系统固定住
 
-A single skill can sometimes rely on chat history for state. Multiple skills cannot. Each skill may rewrite the same natural-language summary. After a few phases, nobody knows which fact came from where. State has to be structured, and phase outputs should append rather than overwrite.
+单个技能有时可以依赖聊天历史保存状态。多个技能不能。每个技能可能重写同一份自然语言摘要。几个阶段之后，没有人知道哪个事实来自哪里。状态必须结构化，阶段输出应追加，而不是覆盖。
 
-Call this structure a state envelope. It does not need to be a database. It can be a runtime object holding artifacts, citations, decisions, errors, warnings, user overrides, and policy checks. Each skill writes only the fields it owns and preserves source. The next skill reads necessary fields instead of reinterpreting the whole conversation.
+可以把这个结构叫作状态信封。它不一定是数据库，可以只是一个运行时对象，保存 artifacts、citations、decisions、errors、warnings、user overrides 和 policy checks。每个技能只写自己拥有的字段，并保留来源。下一个技能读必要字段，而不是重新解释整段对话。
 
 ```json
 {
@@ -77,90 +77,83 @@ Call this structure a state envelope. It does not need to be a database. It can 
   "decisions": [
     {
       "by": "tech-geek-blog",
-      "decision": "Keep existing draft:false because the post was already public.",
-      "reason": "Do not unpublish content without an explicit user request."
-    }
-  ],
-  "citations": [
-    {
-      "id": "mcp_spec",
-      "url": "https://modelcontextprotocol.io/specification/2025-06-18",
-      "used_for": "protocol boundary for tools and context"
+      "decision": "保留 draft:false，因为文章已经公开。",
+      "reason": "没有用户明确要求时，不应取消发布状态。"
     }
   ],
   "warnings": [
     {
       "source": "quality_gate",
-      "message": "Evidence density warning accepted as false positive for English output."
+      "message": "证据密度警告被接受为误报。"
     }
   ]
 }
 ```
 
-The important part is append semantics. A generation phase should not silently delete an evidence warning. A build phase should not rewrite a writing decision. A user override should enter state with scope and lifetime. This gives the system a timeline.
+重点是追加语义。生成阶段不应悄悄删掉证据警告。构建阶段不应改写写作决定。用户覆盖也应带着范围和寿命进入状态。这样系统才有时间线。
 
-## Overrides Need Scope and Lifetime
+## 覆盖需要范围和寿命
 
-Users often give temporary preferences: use only English sources, do not browse, write fast first, keep the original title, run commands only in this directory. These preferences should matter. They should not live forever.
+用户经常给临时偏好：只用英文来源、不要联网、先快写一版、保留原题、只在这个目录运行命令。这些偏好应当生效，但不应永远生效。
 
-Scope says where the override applies. This turn, this session, this project, this skill, this tool, this output field. "Do not publish this article" should affect the article's publication step, not every future blog. "Use English this time" should affect the current output language, not every future code comment.
+范围说明覆盖在哪里生效。本轮、本会话、本项目、本技能、本工具、本输出字段。“不要发布这篇文章”应影响当前文章发布步骤，而不是所有未来博客。“这次用英文”应影响当前输出语言，而不是未来所有代码注释。
 
-Lifetime says when the override expires. The default should be short. Persistent overrides need explicit confirmation because they change future behavior. Many strange AI-tool behaviors come from stale preferences. A user asks for terse answers once, and the system stays terse for days. That is not intelligence. It is an override without expiration.
+寿命说明覆盖什么时候过期。默认应短。持久覆盖需要显式确认，因为它会改变未来行为。很多奇怪的 AI 工具行为来自过期偏好。用户曾要求一次简短回答，系统就简短好几天。这不是智能，只是没有过期的覆盖。
 
-Overrides also need non-overridable fields. Users can override style. They cannot override safety boundaries. They can request fewer tools. They cannot request hidden audit logs. They can ask to preserve phrasing. They cannot ask to preserve known falsehoods.
+覆盖也要有不可覆盖字段。用户可以覆盖风格，不能覆盖安全边界。用户可以少用工具，不能要求隐藏审计。用户可以要求保留措辞，不能要求保留已知错误。
 
-## Conflict Resolution Should Be Deterministic
+## 冲突解决应当确定
 
-Conflicts are normal. A blog skill wants long-form prose. A site template wants concise frontmatter. A research skill wants public citations. The user says use local files only. A publish skill wants to push. A safety rule wants to inspect the worktree. Two skills propose different titles. The problem is not conflict. The problem is improvising conflict resolution.
+冲突很正常。博客技能想要长文。站点模板想要简短 frontmatter。研究技能想要公开引用。用户说只用本地文件。发布技能想 push。安全规则想检查工作区。两个技能给出不同标题。问题不在冲突本身，而在临场表演式地解决冲突。
 
-Rules should be explicit. System safety beats user preference. Explicit user instruction beats skill defaults. Task-specific skills beat generic skills. Write operations need stricter gates than read operations. Project conventions beat newly imported style advice. Low-confidence inference cannot override high-confidence fact.
+规则应当明确。系统安全高于用户偏好。用户显式指令高于技能默认。任务专用技能高于通用技能。写操作比读操作需要更硬的门。项目约定高于新导入的风格建议。低置信推断不能覆盖高置信事实。
 
-With deterministic rules, the model does not need to perform balance theater. It can name the conflict and apply the rule. If a user asks to publish while the worktree contains unrelated changes, stop and explain. If a writing skill defaults to draft mode but the file is already public and the user asks for a final blog, preserve publication state and record the decision. The point is not that every rule is obvious. The point is that the decision can be explained.
+有了确定规则，模型就不需要假装权衡。它可以命名冲突并应用规则。如果用户要求发布但工作区有无关修改，就停下并说明。如果写作技能默认草稿模式，但文件已经公开且用户要求终稿，就保留发布状态并记录决定。重点不是每条规则都显而易见，而是决定能被解释。
 
-## Risk Determines Static Versus Dynamic Routing
+## 风险决定静态路由还是动态路由
 
-Routing debates often split into two camps. One wants fully automatic intelligent routing. The other wants fixed human-written workflows. Both are reacting to real risks. Automatic routing adapts but can be hard to audit. Fixed workflows are stable but slow to extend.
+路由讨论常分成两派。一派想要完全自动的智能路由。另一派想要固定的人写工作流。两派都在回应真实风险。自动路由适应性强，但难审计。固定工作流稳定，但扩展慢。
 
-The practical split is risk. Read-only, low-risk, reversible work can route dynamically: summarize, rewrite, search public documents, generate candidate titles. Write operations, payments, permissions, publishing, deletion, external communication, and production changes should use fixed chains or explicit confirmation. The model can suggest. The runtime controls.
+实用分界是风险。只读、低风险、可逆工作可以动态路由：总结、改写、搜索公开文档、生成候选标题。写操作、付款、权限、发布、删除、外部通信和生产变更，应使用固定链条或显式确认。模型可以建议，运行时必须控制。
 
-This is least privilege applied to skills. Capabilities are not granted uniformly. They are opened when task, risk, and policy justify them. A mature harness is not the one with the most tools always available. It is the one where powerful tools are unavailable by default.
+这就是最小权限在技能层的应用。能力不是均匀授予的。只有任务、风险和策略共同证明它合理时，能力才打开。成熟执行框架不是拥有最多工具且永远可用的那个，而是强工具默认不可用的那个。
 
-## Capability Graphs Beat Skill Lists
+## 能力图胜过技能列表
 
-Many systems store skills as a list. Lists show what exists. They do not express relationships. Real tasks need a graph. Nodes are skills, tools, scripts, references, and artifacts. Edges say depends on, consumes, produces, overrides, or conflicts with.
+很多系统把技能存成列表。列表能说明有什么，不能表达关系。真实任务需要图。节点是技能、工具、脚本、参考和产物。边说明依赖、消费、产生、覆盖或冲突。
 
-A blog-writing skill consumes Markdown drafts and produces articles plus audits. A research skill produces evidence tables. A publishing skill consumes articles that passed checks and produces commits or PRs. An image skill should not feed publishing directly without review or format checks. A research skill's unverified sources should not become final claims without audit.
+博客写作技能消费 Markdown 草稿，产生文章和审计。研究技能产生证据表。发布技能消费通过检查的文章，产生 commit 或 PR。图像技能不应不经检查直接喂给发布。研究技能未验证来源不应直接变成最终主张。
 
-The graph prevents illegal chains. It also explains why a skill was not used. It was not merely low-scoring; it lacked required input or produced output the downstream phase could not consume. That explanation helps the user repair the task.
+图能阻止非法链条，也能解释为什么某技能没有使用。它不是分数低，而是缺少输入，或产出的东西下游无法消费。这个解释能帮助用户修正任务。
 
-## Budget Scheduling Is Routing
+## 预算调度也是路由
 
-Routing allocates budget as well as capability. Budget includes context, tool calls, network time, compute cost, user patience, and risk. A complex task may have a fast weak path, a slow auditable path, and an expensive complete path. Matching score alone ignores that difference.
+路由分配的不只是能力，还有预算。预算包括上下文、工具调用、网络时间、计算成本、用户耐心和风险。复杂任务可能有快但弱的路径、慢但可审计的路径、昂贵但完整的路径。只看匹配分数会忽略这些差异。
 
-Budget should follow user goal and task risk. "Quick pass" justifies a light route. "Ready to publish" requires full gates. Compliance work deserves more evidence and audit. A title edit should not load a research pipeline.
+预算应跟随用户目标和任务风险。“快速看一遍”可以走轻路径。“准备发布”必须跑完整门禁。合规工作值得更多证据和审计。改标题不应加载研究管线。
 
-Budget can also upgrade mid-run. Start light. If the quality gate says evidence is weak, allow public-source verification. If the build fails, load site-debugging rules. If the user asks to publish, enter git and PR flow. Choosing the heaviest path first is slow. Choosing the lightest path forever is brittle.
+预算也可以中途升级。先轻跑。质量门说证据弱，再允许公开来源验证。构建失败，再加载站点调试规则。用户要求发布，再进入 git 和 PR 流程。上来就选最重路径很慢，一直选最轻路径很脆。
 
-## Replay Is the Router's Debugger
+## 回放是路由器的调试器
 
-If routing cannot be replayed, it cannot be debugged. The same user request went through the writing skill yesterday and the research skill today. Did the user context change. Did skill descriptions change. Did the model change. Did the threshold change. Asking the model again is not reproduction.
+路由不能回放，就不能调试。同一个用户请求昨天走写作技能，今天走研究技能。是用户上下文变了，技能描述变了，模型变了，还是阈值变了？再问一次模型不是复现。
 
-Replay requires input snapshot, available skill list, skill description versions, routing prompt, candidate scores, overrides, runtime policy, and final selection. Replaying the route offline tells you whether later execution failed or the route itself changed. It also allows simulation. Before adding a new skill, run historical requests and see which tasks it steals. Before changing a description, estimate false positives. Without simulation, routing changes become live experiments.
+回放需要输入快照、可用技能列表、技能描述版本、路由提示词、候选分数、覆盖、运行时策略和最终选择。离线重放路由，才能判断是后续执行失败，还是路由本身变化。它也支持模拟。新增技能前，跑历史请求看它会抢走哪些任务。修改描述前，估计误触发。没有模拟，路由变化就成了线上实验。
 
-## Users Should Be Able to Challenge Routing
+## 用户应能质疑路由
 
-A mature system should survive the question, "Why did you use this skill?" If the answer is "the model decided," routing has not become engineering. A better explanation names trigger conditions, input evidence, and risk rules: this request used the blog skill because the input was Markdown, the user asked for a publishable technical article, and the skill claims that task; it did not use the paper-writing skill because the target was not LaTeX or a venue format.
+成熟系统应经得起一句“为什么用了这个技能”。如果答案是“模型决定的”，路由还没有工程化。更好的解释会说触发条件、输入证据和风险规则：这次使用博客技能，是因为输入是 Markdown，用户要求可发布技术文章，技能声明覆盖这个任务；没有使用论文写作技能，因为目标不是 LaTeX 或会场格式。
 
-The explanation does not need to appear every time. It should be available. Users can correct it: "No, I want paper style," or "Do not browse," or "Keep this local." Those corrections become overrides. High-risk skills need explanation even more. A publish skill or remote-write tool should never appear silently.
+解释不必每次都展示，但必须可用。用户可以纠正：“不，我要论文风格”，“不要联网”，“只用本地文件”。这些纠正进入覆盖。高风险技能更需要解释。发布技能或远程写工具不应静默出现。
 
-Explanations also improve skill design. If the router cannot explain why a skill was chosen, the description is probably too broad or the boundary too soft. Weak explanations become feedback for rewriting descriptions, adding negative conditions, or splitting skills.
+解释也会反过来改进技能设计。如果路由器解释不了为什么选中某技能，描述大概率太宽，边界太软。弱解释是重写描述、增加负条件或拆分技能的反馈。
 
-## More Skills Should Mean Less Loading
+## 技能越多，每次加载应越少
 
-The counterintuitive rule is that the more skills a system has, the fewer it should load per task. A hundred available skills does not mean a hundred active skills. The point of routing is to cut context down to what the task needs.
+反直觉的规则是：系统技能越多，每个任务加载的技能应该越少。一百个可用技能，不等于一百个活跃技能。路由的意义是把上下文切到任务真正需要的部分。
 
-Granularity matters. A "write anything" skill is too broad. A "perform evidence audit for Chinese technical blog drafts" skill may be too narrow unless it is reused often. A useful unit usually corresponds to a deliverable or a stable phase. Skill design should ask not "what else can this do," but "what should this not do."
+粒度很重要。“写任何东西”太宽。“为中文技术博客草稿做证据审计”可能太窄，除非经常复用。一个有用单位通常对应交付物或稳定阶段。设计技能时，不该问“它还能做什么”，而该问“它不应该做什么”。
 
-Routing is not a model problem alone. It is scheduling, state, permissions, testing, and audit. A larger model may understand intent better. It will not automatically invent override lifetimes, replay logs, conflict rules, or publish gates. Those must be designed.
+路由不只是模型问题。它是调度、状态、权限、测试和审计。更大的模型也许更懂意图，但不会自动发明覆盖寿命、回放日志、冲突规则或发布门。这些都要设计。
 
-Do not solve every gap by adding another skill. Ask when it triggers, what it consumes, what it produces, what it may override, how it composes, how it is tested, and how it can be rolled back. If the answers are clear, it is an asset. If not, it is another global variable with a nicer name.
+不要用新增技能解决每个缝隙。先问它什么时候触发，消费什么，产出什么，可以覆盖什么，如何组合，如何测试，如何回滚。答案清楚，它就是资产。答案不清楚，它只是另一个名字更好听的全局变量。

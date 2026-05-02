@@ -18,8 +18,8 @@ const formattedDate = entry.data.date ? formatEntryDate(entry.data.date, "long")
 <BaseLayout title={entry.data.title} description={entry.data.description} bodyClass="notes-page" useMath={entry.data.use_math}>
   <main class="paper-main">
     <article class="paper-sheet paper-article reveal">
-      <a class="back-link" href="/notes/">Back to notes</a>
-      <p class="paper-kicker">Notes{formattedDate && ` / ${formattedDate}`}</p>
+      <a class="back-link" href="/notes/">返回笔记</a>
+      <p class="paper-kicker">笔记{formattedDate && ` / ${formattedDate}`}</p>
       <h1>{entry.data.title}</h1>
       {entry.data.deck && <p class="paper-deck">{entry.data.deck}</p>}
       <div class="article-meta-row">

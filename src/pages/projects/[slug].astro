@@ -11,35 +11,93 @@ export function getStaticPaths() {
 }
 
 const { project } = Astro.props;
+const hasRepositoryLink = Boolean(project.sourceUrl && project.repo);
+const showRepositoryBrowser = Boolean(
+  hasRepositoryLink && project.branch && project.sync !== false && project.showRepositoryBrowser !== false
+);
+const theme = project.theme ?? {};
+const themeStyle = [
+  theme.accent && `--project-accent: ${theme.accent}`,
+  theme.accent2 && `--project-accent-2: ${theme.accent2}`,
+  theme.surface && `--project-surface: ${theme.surface}`,
+  theme.soft && `--project-soft: ${theme.soft}`
+]
+  .filter(Boolean)
+  .join("; ");
 ---
 
-<BaseLayout title={project.title} description={project.summary} bodyClass="projects-page">
-  <main class="mac-main">
-    <a class="back-link" href="/projects/">Back to projects</a>
-    <section class="project-hero reveal">
-      <div>
+<BaseLayout title={project.title} description={project.summary} bodyClass="projects-page project-detail-page">
+  <main class="project-story" style={themeStyle}>
+    <a class="back-link" href="/projects/">返回项目</a>
+
+    <section class="project-stage">
+      <div class="project-stage-copy">
         <p class="eyebrow">{project.kind}</p>
         <h1 class="article-title">{project.title}</h1>
+        <p class="project-tagline">{project.tagline ?? project.summary}</p>
         <p class="article-deck">{project.summary}</p>
         <div class="article-meta-row">
-          <span class="article-meta-pill">{project.repo}</span>
-          <span class="article-meta-pill">{project.branch}</span>
-          {project.tags.map((tag) => <span class="article-meta-pill">{tag}</span>)}
+          {(project.tags ?? []).map((tag) => <span class="article-meta-pill">{tag}</span>)}
+        </div>
+        <div class="project-action-row">
+          {
+            hasRepositoryLink ? (
+              <a class="project-action-primary" href={project.sourceUrl} target="_blank" rel="noreferrer">打开仓库</a>
+            ) : (
+              <span class="project-action-primary project-action-disabled">仓库入口预留</span>
+            )
+          }
+          <span class="project-action-note">{project.repositoryNote ?? project.repositoryStatus ?? project.status}</span>
         </div>
       </div>
-      <aside class="fact-panel">
-        <div class="fact-list">
-          <article>
-            <span>Project focus</span>
-            <strong>{project.focus}</strong>
-          </article>
-          <article>
-            <span>Source repository</span>
-            <strong>{project.sourceUrl}</strong>
-          </article>
+
+      <aside class="project-signal-panel" aria-label={`${project.title} 亮点`}>
+        <div class="project-signal-grid">
+          {(project.heroPoints ?? []).map((point) => <span>{point}</span>)}
         </div>
       </aside>
     </section>
-    <ProjectExplorer project={project} />
+
+    <section class="project-metrics" aria-label={`${project.title} 项目信息`}>
+      {(project.metrics ?? []).map((item) => (
+        <article>
+          <strong>{item.value}</strong>
+          <span>{item.label}</span>
+        </article>
+      ))}
+    </section>
+
+    <section class="project-story-grid">
+      <div>
+        <p class="eyebrow">定位</p>
+        <h2>{project.focus}</h2>
+        {project.audience && <p>{project.audience}</p>}
+      </div>
+      <div class="project-story-list">
+        {(project.story ?? []).map((section) => (
+          <article>
+            <h3>{section.title}</h3>
+            <p>{section.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="project-repository-band" aria-label={`${project.title} 仓库状态`}>
+      <div>
+        <p class="eyebrow">仓库</p>
+        <h2>{project.repositoryStatus ?? (hasRepositoryLink ? "已在 GitHub 公开" : "等待发布")}</h2>
+        <p>{project.repositoryNote ?? project.repo}</p>
+      </div>
+      {
+        hasRepositoryLink ? (
+          <a class="source-link" href={project.sourceUrl} target="_blank" rel="noreferrer">{project.repo}</a>
+        ) : (
+          <span class="source-link source-link-disabled">{project.repo}</span>
+        )
+      }
+    </section>
+
+    {showRepositoryBrowser && <ProjectExplorer project={project} />}
   </main>
 </BaseLayout>

@@ -145,6 +145,15 @@ async function fetchText(url) {
 }
 
 async function syncProject(project) {
+  if (project.sync === false) {
+    console.log(`skipped ${project.slug}: repository preview disabled`);
+    return;
+  }
+  if (!project.sourceUrl || !project.repo || !project.branch) {
+    console.log(`skipped ${project.slug}: repository preview not configured`);
+    return;
+  }
+
   const [owner, repoName] = project.repo.split("/");
   if (!owner || !repoName) {
     throw new Error(`Invalid repository name for ${project.slug}: ${project.repo}`);

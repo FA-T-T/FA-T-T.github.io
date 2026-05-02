@@ -1,35 +1,35 @@
 ---
-title: "Part 6 | Guardrails and Audit Inside Skills: Controllable Practice in Early 2026"
-description: 'AI safety cannot live only at the outer gateway. A skill that reads data, calls tools, or writes artifacts must declare its own permissions, guardrails, logs, and replay boundary.'
-deck: 'Once a skill can call tools, read references, write files, or trigger external actions, safety is no longer a filter added at the end. It becomes part of the task package.'
+title: "第 6 篇 | 技能内部的护栏与审计：2026 年初的可控实践"
+description: "AI 安全不能只放在最外层网关。一个会读数据、调工具或写产物的技能，必须声明自己的权限、护栏、日志和回放边界。"
+deck: "当技能能调用工具、读取参考、写文件或触发外部动作时，安全就不再是末尾加上的过滤器，而是任务包的一部分。"
 date: 2026-01-20
 tags:
-  - skills
-  - safety
-  - audit
+  - 技能
+  - 安全
+  - 审计
 use_math: false
 draft: false
 ---
 
-The most dangerous failure in an AI workflow is not always a wrong sentence. A worse failure is doing the right action under the wrong permission. The model understands the user, fills the right arguments, and calls the right tool, but the tool should not have been available in that context. Or it reads a file it should not read and carries sensitive fields downstream. Or it treats instructions hidden in an untrusted web page as if they came from the system. The answer looks smooth. The incident has already happened.
+AI 工作流里最危险的失败不一定是一句错误答案。更糟的是，在错误权限下执行了正确动作。模型理解了用户，填对了参数，调用了正确工具，但这个工具在当前上下文里本不该可用。或者它读了不该读的文件，又把敏感字段带到下游。或者它把不可信网页里藏着的指令当成系统指令。最终答案很顺，事故已经发生。
 
-That is why safety cannot live only at the outer gateway. The gateway sees a request packet. The skill sees task purpose, source material, tool set, output destination, and failure boundary. A writing skill and a finance-approval skill can receive the same sentence and carry different risk. Global policy can set a floor. It cannot replace task-local judgment.
+所以安全不能只住在最外层网关。网关看到的是请求包。技能看到的是任务目的、来源材料、工具集合、输出目的地和失败边界。写作技能和财务审批技能可以收到同一句话，但风险完全不同。全局策略可以设底线，不能替代任务局部判断。
 
-Public safety guidance points in the same direction. [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) names prompt injection, insecure output handling, sensitive information disclosure, insecure plugin design, and excessive agency as major application risks. The [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) frames trustworthiness as something managed across design, development, deployment, and use. OpenAI's Agents SDK documents [input, output, and tool guardrails](https://openai.github.io/openai-agents-python/guardrails/) as distinct mechanisms. The vocabulary differs. The common point is that safety cannot be a text filter after generation.
+公开安全材料也在指向同一个方向。[OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) 把提示注入、不安全输出处理、敏感信息泄漏、不安全插件设计和过度代理列为主要应用风险。[NIST AI 风险管理框架](https://www.nist.gov/itl/ai-risk-management-framework) 把可信度放进设计、开发、部署和使用的全流程。OpenAI Agents SDK 也把 [输入、输出和工具护栏](https://openai.github.io/openai-agents-python/guardrails/) 区分为不同机制。词汇不完全一样，但共同点清楚：安全不能只是生成后的文本过滤。
 
-## The Gateway Cannot See Task Semantics
+## 网关看不见任务语义
 
-Outer gateways are useful. They can enforce authentication, rate limits, obvious abuse rules, sensitive-pattern checks, and organization-wide bans. The problem is that many risks depend on task semantics. "Read this file" may be appropriate in a local code-review skill and out of bounds in a public web-summary skill. "Send it to him" may require ticket permissions in customer support and should not be possible in a personal writing tool. "Use this external source" may be fine in a blog post and insufficient in a legal memo.
+外层网关有用。它可以做认证、限流、明显滥用检测、敏感模式检查和组织级禁令。问题是，很多风险依赖任务语义。“读这个文件”在本地代码评审技能里可能合理，在公共网页摘要技能里就越界。“发给他”在客服场景可能需要工单权限，在个人写作工具里不该可能发生。“使用这个外部来源”在博客里可能可以，在法律备忘录里可能远远不够。
 
-The gateway cannot know all those local boundaries unless it reimplements every skill's meaning. That moves the problem back into a central black box. A better structure is layered governance. The global layer defines hard constraints. The domain layer defines common rules for a class of tasks. The skill layer defines the task-specific boundary. The runtime merges the three and logs the resulting configuration.
+网关如果想理解所有这些局部边界，就必须重新实现每个技能的意义。问题又回到中央黑箱。更好的结构是分层治理。全局层定义硬约束。领域层定义一类任务的共通规则。技能层定义任务特定边界。运行时合并三层，并记录最终配置。
 
-This avoids two failures. It prevents every skill from inventing its own safety policy. It also prevents the central policy from becoming so abstract that it cannot handle real tasks.
+这样能避免两个失败。它防止每个技能自己发明安全政策，也防止中央政策抽象到无法处理真实任务。
 
-## Guardrails Must Be Decidable
+## 护栏必须可判定
 
-"Be safe," "do not leak private data," and "follow the law" are common instructions. They are weak runtime controls. They cannot be tested directly, and they do not tell the system what to do when a rule fires.
+“保持安全”、“不要泄漏隐私”、“遵守法律”是常见指令。它们作为运行时控制很弱。它们不能直接测试，也不说明规则触发时系统该做什么。
 
-A useful guardrail names the trigger, action, and output shape. If the user asks to read a path outside allowed roots, refuse with `permission_denied`. If output matches token, key, ID, or payment-card patterns, redact and record the redaction. If a tool returns content marked untrusted, treat it as data, not instruction. These rules are still imperfect. At least they can be tested.
+有用护栏会命名触发条件、动作和输出形状。如果用户要求读取允许根目录之外的路径，就以 `permission_denied` 拒绝。如果输出匹配 token、密钥、证件号或支付卡模式，就脱敏并记录。如果工具返回内容标成不可信，就把它当数据而不是指令。这些规则仍不完美，但至少可以测试。
 
 ```yaml
 safety:
@@ -44,36 +44,36 @@ safety:
         - "public_source_verification"
   input_guardrails:
     - id: path_escape
-      trigger: "requested path resolves outside allowed_roots"
+      trigger: "请求路径解析到 allowed_roots 之外"
       action: "refuse"
       code: "permission_denied"
   output_guardrails:
     - id: secret_pattern_redaction
-      trigger: "output matches token_or_key_patterns"
+      trigger: "输出匹配 token 或 key 模式"
       action: "redact_and_record"
   tool_guardrails:
     - id: external_action_confirmation
-      trigger: "tool mutates remote state"
+      trigger: "工具会改变远程状态"
       action: "require_confirmation"
 ```
 
-This is not a final standard. It shows the move from slogan to configuration. Every rule can become a test case: path escape, secret pattern, remote mutation. If it cannot be tested, it should not pretend to be a runtime boundary.
+这不是最终标准，而是从口号到配置的移动。每条规则都可以变成测试用例：路径逃逸、密钥模式、远程变更。不能测试的东西，不应假装是运行时边界。
 
-## Input, Output, and Tool Guardrails Do Different Jobs
+## 输入、输出和工具护栏负责不同工作
 
-Input guardrails fire before the main model work. They are good for blocking clear abuse, impossible tasks, unauthorized requests, and expensive attacks. OpenAI's Agents SDK notes the latency and cost tradeoff: running guardrails before or in parallel with agent execution changes whether the model may already have consumed tokens or called tools by the time a violation appears. High-risk work should be willing to slow down before side effects.
+输入护栏在主模型工作之前触发，适合阻断明显滥用、不可完成任务、未授权请求和昂贵攻击。Agents SDK 也提醒了延迟和成本权衡：护栏是在执行前跑，还是和智能体执行并行跑，会决定模型是否已经消耗 token 或调用工具。高风险工作应该愿意在副作用前慢下来。
 
-Output guardrails fire after model generation. They check whether the final answer leaks sensitive information, lacks required fields, violates format, or requires approval. They cannot undo a dangerous tool call that already happened. If the model already sent an email, blocking the final response does not unsend the email.
+输出护栏在模型生成后触发，检查最终答案是否泄漏敏感信息、缺少必填字段、违反格式或需要审批。它不能撤销已经发生的危险工具调用。如果模型已经发出邮件，拦住最终回复并不能把邮件收回来。
 
-Tool guardrails sit around each tool call. They are critical for agentic systems. Check file paths before reading. Check domains before network requests. Check permissions before database writes. Check command class before shell execution. Check amount and confirmation state before payment. Tool guardrails protect action boundaries, not text boundaries.
+工具护栏包在每次工具调用周围，对智能体系统尤其关键。读文件前检查路径。联网前检查域名。写数据库前检查权限。执行 shell 前检查命令类别。付款前检查金额和确认状态。工具护栏保护的是动作边界，不是文本边界。
 
-The three layers do not replace one another. Input decides whether the task may begin. Tool guardrails decide whether actions may happen. Output decides whether the result may be delivered. Collapsing them into "run a safety check" loses timing, and timing is the difference between prevention and postmortem.
+三层不能互相替代。输入决定任务能不能开始。工具护栏决定动作能不能发生。输出决定结果能不能交付。把它们统称“跑一个安全检查”，会丢掉时序；时序正是预防和事后检讨的区别。
 
-## Audit Is Not Chat History
+## 审计不是聊天记录
 
-Chat logs show what the user and model said. They do not show what the runtime did. They often omit skill version, configuration, tool input, tool output, permission decisions, retries, source material, model version, and environment. Without those fields, investigation becomes guesswork.
+聊天记录显示用户和模型说了什么，但不显示运行时做了什么。它常常缺少技能版本、配置、工具输入、工具输出、权限决定、重试、来源材料、模型版本和环境。没有这些字段，事故调查只能猜。
 
-A replayable skill run should record at least the run ID and time, skill name and version, configuration hash, user input snapshot, loaded references, assets, tool calls, guardrail triggers, final artifacts, quality-gate results, and user confirmations. That does not mean logging everything forever. It means keeping enough structure to locate failure.
+一次可回放的技能运行至少应记录 run ID 和时间、技能名与版本、配置 hash、用户输入快照、已加载参考、资产、工具调用、护栏触发、最终产物、质量门结果和用户确认。这不意味着永久记录一切，而是保留足够结构来定位失败。
 
 ```json
 {
@@ -85,7 +85,7 @@ A replayable skill run should record at least the run ID and time, skill name an
   "tool_calls": [
     {
       "tool": "web.open",
-      "purpose": "official source verification",
+      "purpose": "官方来源验证",
       "input_digest": "openai_agents_guardrails",
       "status": "ok",
       "duration_ms": 420
@@ -105,70 +105,70 @@ A replayable skill run should record at least the run ID and time, skill name an
 }
 ```
 
-If a fact is wrong, inspect the source. If format is wrong, inspect the gate. If permission failed, inspect policy. If behavior drifted, inspect skill version and configuration hash. Audit exists so the team can improve the system rather than argue about what the model "meant."
+事实错了，就查来源。格式错了，就查质量门。权限错了，就查策略。行为漂了，就查技能版本和配置 hash。审计的作用是让团队改进系统，而不是争论模型“本意”是什么。
 
-## Configuration Hashes Make Runs Comparable
+## 配置 hash 让运行可比较
 
-Teams often say, "We used the same configuration." Without a hash, that claim is weak. A prompt changed by one sentence, a tool schema changed by one field, a reference file changed version, or a model parameter changed temperature. Any of those can affect behavior.
+团队常说“我们用了同一配置”。没有 hash，这句话很弱。提示词改了一句，工具 schema 改了一个字段，参考文件换了版本，模型温度改了，都会影响行为。
 
-A configuration hash should cover the skill main file, reference versions, tool schemas, safety rules, important model parameters, and routing decisions. Seeing the same hash does not prove correctness. It proves comparability. Seeing a different hash tells you that a control-plane change may explain behavior drift.
+配置 hash 应覆盖技能主文件、参考版本、工具 schema、安全规则、重要模型参数和路由决定。相同 hash 不证明正确，只证明可比较。不同 hash 则告诉你，控制面变化可能解释行为漂移。
 
-This is enough to support regression. Without comparability, there is no serious regression testing. Every improvement becomes a story.
+这足以支撑回归。没有可比较性，就没有严肃回归测试。每次改进都会变成故事。
 
-## Data Minimization Beats Late Redaction
+## 数据最小化胜过事后脱敏
 
-Output redaction is necessary. It is also late. The safer move is not to hand unnecessary data to the skill. A summarization skill that does not need full ID numbers should not receive them. A code-review skill that does not need `.env` should not read it. A support-reply skill that needs order status should not receive the customer's full address history.
+输出脱敏必要，但太晚。更安全的做法是不把不必要数据交给技能。摘要技能不需要完整证件号，就不该收到。代码评审技能不需要 `.env`，就不该读。客服回复技能需要订单状态，不一定需要客户完整地址历史。
 
-Data minimization has to appear in tools and skills. Tools should offer field selection, range limits, and permission filters. Skills should declare which fields the task requires and which it does not. The runtime should pass the intersection. Even if prompt injection succeeds, the accessible data surface is smaller.
+数据最小化必须出现在工具和技能里。工具应提供字段选择、范围限制和权限过滤。技能应声明任务需要哪些字段、不需要哪些字段。运行时传交集。即使提示注入成功，可访问的数据表面也更小。
 
-Late redaction also cannot remove influence. If a model sees information it should not see, that information may shape the decision even if the final text hides it. Hiring, finance, medical, and access-control workflows cannot treat redaction as enough. The better boundary is upstream.
+事后脱敏也无法消除影响。如果模型看见了不该看的信息，这些信息可能影响决策，即使最终文本隐藏了它。招聘、金融、医疗和访问控制工作流不能把脱敏当成足够边界。更好的边界在上游。
 
-## Red-Team Cases Should Become Skill Tests
+## 红队案例应变成技能测试
 
-Guardrails that are never tested become comfort language. High-risk skills need red-team examples: path traversal, hidden instructions, untrusted source injection, sensitive-field leakage, permission escalation, format bypass, polluted tool output, and user requests to ignore rules. The goal is not to prove perfect safety. The goal is to prevent known failures from returning.
+从不测试的护栏只是安慰性语言。高风险技能需要红队例子：路径穿越、隐藏指令、不可信来源注入、敏感字段泄漏、权限升级、格式绕过、污染工具输出、用户要求忽略规则。目标不是证明完美安全，而是防止已知失败回归。
 
-Each fixed issue should become a regression case. When the prompt changes, the model changes, or a tool schema changes, run the cases. OWASP's list is valuable because it gives a way to hunt boundaries, not because it exhausts all attacks.
+每个修复过的问题都应该变成回归案例。当提示词变化、模型变化或工具 schema 变化时，跑这些案例。OWASP 的列表有价值，不是因为它穷尽所有攻击，而是因为它给了寻找边界的方法。
 
-Expected action matters. Not every dangerous input should produce the same refusal. Some should refuse. Some should degrade. Some should require confirmation. Some should proceed with redaction. Some should continue but mark the source untrusted. Precision matters because over-refusal destroys utility and under-refusal creates risk.
+期望动作也很重要。不是每个危险输入都应产生同一种拒绝。有些要拒绝。有些要降级。有些需要确认。有些可以继续但要脱敏。有些可以继续但要标记来源不可信。过度拒绝会破坏实用性，不足拒绝会制造风险。
 
-## Audit Logs Have Privacy Boundaries
+## 审计日志也有隐私边界
 
-Audit logs can leak too. Recording full user input, full tool output, and full file contents makes investigation easy and exposure larger. Audit must also practice minimization. Store digests, source IDs, field types, redacted snippets, and structured decisions where possible. Store full material only under controlled access, retention limits, and its own audit.
+审计日志也会泄漏。记录完整用户输入、完整工具输出和完整文件内容，调查会很容易，暴露面也会更大。审计本身也要最小化。能存摘要、source ID、字段类型、脱敏片段和结构化决定时，就不要默认存全文。需要存全文，也要有访问控制、留存期限和自己的审计。
 
-The tradeoff depends on task risk. Low-risk writing can keep lightweight notes. High-risk write operations need fuller traces. Sensitive-data workflows need redaction and access control. Public-source verification can keep URLs. Internal documents may keep only document IDs and versions.
+取舍取决于任务风险。低风险写作可以保留轻量笔记。高风险写操作需要更完整轨迹。敏感数据工作流需要脱敏和访问控制。公开来源验证可以保留 URL。内部文档也许只保留文档 ID 和版本。
 
-The skill should declare its logging needs. A blog skill needs sources and quality-gate results. A finance skill needs amount, approval chain, and permission checks. A medical summary needs source, time, limitation, and human confirmation. One global log format can provide a baseline. The skill supplies task-specific audit.
+技能应声明自己的日志需求。博客技能需要来源和质量门结果。财务技能需要金额、审批链和权限检查。医疗摘要需要来源、时间、限制和人工确认。一个全局日志格式可以提供基线，技能补充任务特定审计。
 
-Audit strategy itself needs versioning. What is retained, redacted, deleted, and readable should move with skill configuration and enter the configuration hash. Otherwise the audit system becomes another invisible system with its own drift.
+审计策略本身也要版本化。保留什么、脱敏什么、删除什么、谁能读，都应随技能配置移动并进入配置 hash。否则审计系统也会变成另一个隐形漂移源。
 
-## Failure Needs Classes
+## 失败需要分类
 
-Safety systems often collapse every stop into refusal. The user sees "I cannot complete this request." The developer sees "policy failed." That is too blunt. Permission failure, insufficient evidence, invalid format, high risk, unavailable tool, and policy block require different next actions.
+安全系统常把所有停止都压成拒绝。用户看到“我不能完成这个请求”。开发者看到“策略失败”。这太粗。权限失败、证据不足、格式非法、高风险、工具不可用和策略阻断，需要不同下一步。
 
-A mature skill should expose failure codes: `permission_denied`, `insufficient_evidence`, `needs_confirmation`, `format_invalid`, `tool_unavailable`, `policy_blocked`. Permission failure needs authorization. Evidence failure needs retrieval or user material. Confirmation needs a displayed action object. Format failure needs argument repair. Tool unavailability needs retry or downgrade. Policy block ends the path.
+成熟技能应暴露失败码：`permission_denied`、`insufficient_evidence`、`needs_confirmation`、`format_invalid`、`tool_unavailable`、`policy_blocked`。权限失败需要授权。证据失败需要检索或用户材料。确认失败需要展示动作对象。格式失败需要参数修复。工具不可用需要重试或降级。策略阻断则结束路径。
 
-Failure classification improves user experience and debugging. It also reduces jailbreak pressure. If users know what is missing, they can provide it. If all failures are vague, they are encouraged to rephrase until something slips through.
+失败分类改善用户体验，也改善调试。它还减少越狱压力。用户知道缺什么，就能补什么。所有失败都模糊，只会鼓励用户不断改写，直到某个版本滑过去。
 
-## Publish Gates Should Be Harder Than Generation Gates
+## 发布门应比生成门更硬
 
-Generation creates a candidate artifact. Publishing, sending, committing, deploying, and writing remote state need harder gates. A blog publish gate may require frontmatter, source audit, site build, and explainable diff. A code gate may require tests, lint, review notes, and no unrelated changes. An image gate may require dimensions, source rights, reference checks, and safety review.
+生成创建候选产物。发布、发送、提交、部署和写远程状态需要更硬的门。博客发布门可能要求 frontmatter、来源审计、站点构建和可解释 diff。代码门可能要求测试、lint、评审说明和无关改动隔离。图像门可能要求尺寸、来源权利、参考检查和安全审查。
 
-Different skills need different gates. The principle is the same. Generation can be broad. Publication must be narrow. A user asking to revise an article has not necessarily asked to publish it. A user asking to generate a script has not necessarily asked to run it against a remote system. A user asking to analyze results has not necessarily asked to change paper claims.
+不同技能需要不同门，但原则相同。生成可以宽，发布必须窄。用户要求修订文章，不必然要求发布文章。用户要求生成脚本，不必然要求拿它跑远程系统。用户要求分析结果，不必然要求改论文主张。
 
-Separating artifact creation from publication prevents the system from turning exploratory work into final action.
+把产物创建和发布分开，能防止系统把探索性工作变成最终动作。
 
-## Audit Files Are Written for Future Failure
+## 审计文件是写给未来故障的
 
-An audit file is not glamorous. It is read when something breaks. Three days later, someone asks where a claim came from. Two weeks later, a model upgrade changes tone. A month later, a post is ready to publish and someone needs to know which claims were unverified. Without audit, future readers reverse-engineer the process from the artifact.
+审计文件不华丽。它在出问题时才被读。三天后，有人问某个主张从哪里来。两周后，模型升级改变语气。一个月后，文章准备发布，别人需要知道哪些结论未验证。没有审计，后来者只能从产物反推过程。
 
-A useful audit is short and specific. Sources should be openable. Unverified claims should be named. Removed model-voice patterns should be described. Author questions should be answerable. Audit does not make a post automatically correct. It preserves doubt. That matters because polished prose tends to erase doubt.
+有用审计短而具体。来源要能打开。未验证主张要命名。移除的模型腔要描述。作者问题要能回答。审计不会自动让文章正确，它保存怀疑。这个很重要，因为精致 prose 常会抹掉怀疑。
 
-The same principle applies to safety. The system should preserve the difference between evidence, inference, preference, and policy. Do not turn unverifiable claims into confident text. Do not turn hidden runtime choices into invisible behavior.
+安全也一样。系统应保留证据、推断、偏好和策略之间的区别。不要把不可验证主张写成自信文本。不要把隐藏运行时选择变成隐形行为。
 
-## Guardrails Expand What Can Be Trusted
+## 护栏让更多工作可以被信任
 
-Guardrails look like restrictions. In the short term, they add latency, confirmation, logging, and implementation cost. In the long term, they let the system handle more serious work. An agent with no permission boundary is suitable only for low-risk advice. A skill with tool guardrails, state envelopes, configuration hashes, audits, and publish gates can enter real workflows.
+护栏看起来像限制。短期内，它们增加延迟、确认、日志和实现成本。长期看，它们让系统能处理更严肃的工作。没有权限边界的智能体只适合低风险建议。带有工具护栏、状态信封、配置 hash、审计和发布门的技能，才有资格进入真实工作流。
 
-This is like brakes on a vehicle. Brakes do not exist to make the vehicle slow. They exist so it can move fast without becoming reckless. AI harnesses need the same thing. Without brakes, do not put them on the road.
+这像刹车。刹车不是为了让车慢，而是为了让车能在不鲁莽的前提下跑得快。AI 执行框架也一样。没有刹车，就不要把它开上路。
 
-This closes the series. Prompting turned requests into contracts. RAG turned evidence into a budget. Function calling turned intent into action plans. Skills packaged task knowledge. Routing scheduled many skills. Guardrails and audit make the package controllable. The durable idea is not a model version. It is the organization of model capability into systems that can be maintained, questioned, replayed, and stopped.
+这一篇也收束了整组文章。提示词把请求变成契约。RAG 把证据变成预算。函数调用把意图变成动作计划。技能包装任务知识。路由调度许多技能。护栏和审计让这个包可控。耐用的东西不是某个模型版本，而是把模型能力组织成可以维护、质疑、回放和停止的系统。

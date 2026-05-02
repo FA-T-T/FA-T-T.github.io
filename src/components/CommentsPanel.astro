@@ -1,0 +1,54 @@
+---
+import { site } from "@data/site";
+
+interface Props {
+  title: string;
+  slug: string;
+}
+
+const { title, slug } = Astro.props;
+const postUrl = new URL(`/blog/${slug}/`, site.url).toString();
+const issueUrl = new URL(`${site.comments.repositoryUrl}/issues/new`);
+issueUrl.searchParams.set("title", `评论：${title}`);
+issueUrl.searchParams.set("body", `文章：${postUrl}\n\n`);
+
+const searchUrl = new URL(`${site.comments.repositoryUrl}/issues`);
+searchUrl.searchParams.set("q", `"${title}"`);
+
+const giscus = site.comments.giscus;
+const hasGiscusConfig = giscus.enabled && giscus.repoId && giscus.category && giscus.categoryId;
+---
+
+<section class="comments-panel" aria-labelledby="comments-title">
+  <p class="rail-kicker">评论</p>
+  <h2 id="comments-title">读者讨论</h2>
+  {
+    hasGiscusConfig ? (
+      <div class="giscus-frame">
+        <script
+          is:inline
+          src="https://giscus.app/client.js"
+          data-repo={site.comments.repository}
+          data-repo-id={giscus.repoId}
+          data-category={giscus.category}
+          data-category-id={giscus.categoryId}
+          data-mapping="pathname"
+          data-strict="1"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="top"
+          data-theme="dark"
+          data-lang="zh-CN"
+          crossorigin="anonymous"
+          async
+        ></script>
+      </div>
+    ) : (
+      <div class="comment-fallback">
+        <p>这篇文章的公开讨论暂时放在 GitHub。</p>
+        <a class="comment-action" href={issueUrl.toString()} target="_blank" rel="noreferrer">发起讨论</a>
+        <a class="comment-secondary" href={searchUrl.toString()} target="_blank" rel="noreferrer">查看讨论</a>
+      </div>
+    )
+  }
+</section>

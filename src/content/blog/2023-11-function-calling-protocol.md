@@ -1,32 +1,32 @@
 ---
-title: "Part 3 | Function Calling Protocols: From Plugins to Schemas and Parallel Tools"
-description: 'Function calling matters less because models can use more APIs, and more because intent, parameters, execution, and results can be placed inside a verifiable I/O protocol.'
-deck: 'The 2023 shift was not tool quantity. It was responsibility boundary: the model maps intent to structured arguments, while the runtime validates, executes, retries, refuses, and audits.'
+title: "第 3 篇 | 函数调用协议：从插件到结构约束与并行工具"
+description: "函数调用的重要性不在于模型能用更多接口，而在于意图、参数、执行和结果终于能放进可验证的输入输出协议。"
+deck: "2023 年的变化不是工具数量，而是责任边界：模型把意图映射成结构化参数，运行时负责验证、执行、重试、拒绝和审计。"
 date: 2023-11-10
 tags:
-  - function-calling
-  - json-schema
-  - tools
+  - 函数调用
+  - 结构化输出
+  - 工具
 use_math: false
 draft: false
 ---
 
-Function calling is often summarized as "models can call tools now." That is true and too coarse. The real change was that a verifiable protocol appeared between the model and the tool. Without that protocol, the model translates a user request into prose and a fragile parser tries to guess what action should happen. With the protocol, the model produces a typed object with fields, required keys, enums, and constraints. The runtime can validate it, reject it, repair it, execute it, and feed the result back.
+函数调用常被概括成“模型现在会调用工具”。这是真的，但太粗。真正的变化是，模型和工具之间出现了一个可验证协议。没有这个协议时，模型把用户请求翻译成一段话，脆弱的解析器再猜该执行什么动作。有了协议，模型产出的是带类型的对象，有字段、必填键、枚举和约束。运行时可以验证它、拒绝它、修复它、执行它，再把结果送回模型。
 
-When OpenAI introduced [function calling](https://openai.com/index/function-calling-and-other-api-updates/) in June 2023, the key move was simple: developers described functions, and the model could choose a function and produce JSON arguments. That turned the model from an answer generator into something closer to an intent-to-arguments compiler. The compiler analogy is imperfect because the model is probabilistic and has no strict semantics. Still, it captures the right boundary. The model should not directly execute the world. It should first produce a plan that can be checked.
+OpenAI 在 2023 年 6 月推出 [函数调用](https://openai.com/index/function-calling-and-other-api-updates/) 时，关键动作很简单：开发者描述函数，模型可以选择函数并生成 JSON 参数。这把模型从回答生成器推进到“意图到参数”的编译器。这个比喻不完美，因为模型仍然是概率系统，没有严格语义。但它抓住了正确边界：模型不应直接执行世界，它应先提出一个可检查的动作对象。
 
-The plugin era had already shown that models could connect to external systems. It also exposed the dangerous part. Tool output can contain untrusted content, and untrusted content can instruct the model to take unintended actions. The OpenAI announcement explicitly warned about that class of risk and recommended user confirmation before actions with real-world impact. That warning mattered as much as the feature. Tool use does not merely extend the model. It connects the model to permission, money, data, and state. If the protocol is soft, capability makes failure harder to locate.
+插件时代已经说明模型可以连接外部系统，也暴露了危险部分。工具输出可能包含不可信内容，不可信内容可能诱导模型执行非预期动作。OpenAI 的公告明确提示了这类风险，并建议在有现实影响的动作前让用户确认。这个提醒和功能本身一样重要。工具使用不是单纯扩展模型能力，它把模型接到权限、金钱、数据和状态上。如果协议是软的，能力越强，故障越难定位。
 
-## Parsing Prose Is Not a Protocol
+## 解析散文不是协议
 
-The naive integration is tempting. The user says, "Check the weather in Beijing tomorrow." The model replies, "Call the weather API with location Beijing and date tomorrow." A parser extracts those words. The demo works. The production system breaks. Prose has no stable fields. "Tomorrow" depends on timezone. "Beijing" may appear in the reason rather than the destination. Unit preference may be implicit. Once a real API call is involved, these ambiguities become bad parameters.
+天真的集成很诱人。用户说“查一下北京明天的天气”。模型回答“调用天气 API，地点北京，日期明天”。解析器抽出这些词。演示能跑。生产会坏。散文没有稳定字段。“明天”依赖时区。“北京”可能出现在理由里而不是目的地里。单位偏好可能是隐含的。一旦真实 API 介入，这些歧义就变成坏参数。
 
-Protocol starts when "what to say" becomes "what to fill." The weather tool is not a paragraph. It is a schema. `location` is a string. `date` is an ISO date. `unit` is one of two values. The model's job is to project user intent into the object. If the object cannot be filled, it should ask or refuse. It should not invent.
+协议从“说什么”变成“填什么”时开始。天气工具不是一段话，而是 schema。地点是字符串。日期是 ISO 日期。单位是两个值之一。模型的工作是把用户意图投影到对象里。如果对象填不出来，它应该询问或拒绝，而不是编造。
 
 ```json
 {
   "name": "get_weather",
-  "description": "Fetch the weather forecast for a location and date.",
+  "description": "查询某地点某日期的天气预报。",
   "parameters": {
     "type": "object",
     "properties": {
@@ -45,78 +45,78 @@ Protocol starts when "what to say" becomes "what to fill." The weather tool is n
 }
 ```
 
-This schema does not make the model smarter. It makes errors legible. `date: "tomorrow"` is a format error. `unit: "kelvin"` is an enum error. A missing `location` is a required-field error. Once the error is legible, the runtime can return targeted feedback and ask the model to repair the object. Function calling turns vague language drift into interface failure.
+这个 schema 不会让模型更聪明。它让错误可读。`date: "明天"` 是格式错误。`unit: "kelvin"` 是枚举错误。缺少 `location` 是必填字段错误。错误一旦可读，运行时就能返回有针对性的反馈，让模型修复对象。函数调用把模糊语言漂移变成了接口失败。
 
-## Responsibility Must Be Split
+## 责任必须拆开
 
-A reliable tool system has at least three layers. The model layer maps intent to a candidate call. The validation layer checks fields, permissions, budgets, risk, and dependencies. The execution layer calls the real system and handles timeout, retry, idempotency, rollback, and logs. If those layers collapse into one, failures collapse too. A wrong tool is intent failure. An invalid argument is schema failure. A service 500 is execution failure. A denied action is policy failure. The split tells the team what to fix.
+可靠的工具系统至少有三层。模型层把意图映射成候选调用。验证层检查字段、权限、预算、风险和依赖。执行层调用真实系统，并处理超时、重试、幂等、回滚和日志。如果这三层塌成一层，故障也会塌成一团。工具选错是意图失败。参数非法是 schema 失败。服务 500 是执行失败。动作被拒绝是策略失败。拆开之后，团队才知道该修哪里。
 
-That is why function calling is not the same as letting the model write code and run it. Direct execution is flexible and unsafe. A model-generated SQL query may solve the task and delete the wrong data. A safer design treats the query as an intermediate artifact. The runtime applies read-only constraints, table allowlists, cost estimates, and permission checks before execution. The protocol's value is not the action. It is the pause before the action.
+所以函数调用不等于让模型写代码然后运行。直接执行灵活，也危险。模型生成的 SQL 可能完成任务，也可能删错数据。更稳的设计是把查询当中间产物。运行时在执行前套上只读约束、表白名单、成本估算和权限检查。协议的价值不只是动作，而是动作前的停顿。
 
-That pause may look expensive in low-risk tasks. In high-risk tasks it is the system. Sending email, filing expense reports, changing permissions, purchasing goods, deploying services, and updating databases all require a boundary. The model can propose. The runtime must decide whether the proposal may happen.
+低风险任务里，这个停顿看起来有成本。高风险任务里，它就是系统。发邮件、报销、改权限、采购、部署服务、更新数据库，都需要边界。模型可以提议。运行时必须判断这个提议能不能发生。
 
-## Structured Outputs Tighten the Contract
+## 结构化输出收紧契约
 
-Structured outputs pushed the same direction further. OpenAI's later [Structured Outputs](https://openai.com/index/introducing-structured-outputs-in-the-api/) work distinguished valid JSON from schema-conforming output. That distinction matters. `{ "foo": "bar" }` is valid JSON. It is not a valid weather API call. A schema-conforming object is eligible for business validation.
+后来的 [结构化输出](https://openai.com/index/introducing-structured-outputs-in-the-api/) 把同一个方向推得更远。它区分了“合法 JSON”和“符合结构约束的输出”。这个区别很重要。`{ "foo": "bar" }` 是合法 JSON，但不是合法的天气接口调用。符合结构约束的对象，才有资格进入业务验证。
 
-Even strict schema adherence is not the whole safety story. A schema can validate date format, but not whether the date is in the supported forecast range. A schema can validate amount type, but not whether the user may spend that amount. A schema can validate recipient format, but not whether an external attachment is allowed. Schema is the first mechanical gate. Business policy comes after.
+严格 schema 仍然不是完整安全。Schema 可以验证日期格式，但不能判断日期是否在支持的预报范围内。Schema 可以验证金额类型，但不能判断用户是否有权花这笔钱。Schema 可以验证收件人格式，但不能判断外部附件是否允许。Schema 是第一道机械门。业务策略在它之后。
 
-This division makes downstream systems cleaner. Without schema, policy must first guess what the model meant. With schema, policy can inspect a known object. That is a different class of system.
+这个分工让下游系统更干净。没有 schema，策略层首先要猜模型是什么意思。有了 schema，策略层检查的是已知对象。这已经是另一类系统。
 
-## Parallel Tool Calls Change Latency and Failure
+## 并行工具改变延迟，也改变失败模型
 
-Serial tool calls accumulate latency. A research request may need web search, local file reads, issue lookup, and a small script. Running them one after another feels slow. Parallel calls can turn sum latency into max latency. That is the obvious win.
+串行工具调用会叠加延迟。一个研究请求可能需要网页搜索、本地文件读取、issue 查询和一个小脚本。一个接一个跑，就慢。并行调用可以把总和延迟变成最大延迟。这是显而易见的收益。
 
-Parallelism also changes the failure model. Independent read-only calls can run together. A create-customer call and a create-order call cannot be parallelized casually. One tool may timeout while another succeeds. The aggregation layer must know whether to continue, retry, degrade, or fail the whole run.
+并行也改变失败模型。独立的只读调用可以一起跑。创建客户和创建订单就不能随便并行。一个工具可能超时，另一个成功。聚合层必须知道该继续、重试、降级还是整个失败。
 
-That requires result envelopes. A tool result should include tool name, call ID, input digest, output, error, duration, retry count, and source. Without the envelope, aggregation receives only text. With the envelope, the system can reason that web search failed but local evidence is enough, or that two sources conflict, or that a database call succeeded while an external API timed out.
+这需要结果信封。工具结果应包含工具名、调用 ID、输入摘要、输出、错误、耗时、重试次数和来源。没有信封，聚合层收到的只是文本。有了信封，系统才能判断网页搜索失败但本地证据足够，或者两种来源互相冲突，或者数据库调用成功而外部 API 超时。
 
-Structured output constraints can also interact with parallelism. Some strict schema modes do not compose cleanly with free parallel tool generation. That is not a footnote. It is the general rule: the harder the protocol, the more explicit coordination parallelism needs.
+结构化输出约束也会和并行发生交互。有些严格 schema 模式不容易和自由并行工具生成组合。这不是脚注，而是普遍规则：协议越硬，并行越需要明确协调。
 
-## Outputs Need Protocol Too
+## 输出也需要协议
 
-Many systems specify tool inputs and leave tool outputs as prose. That is a trap. A retrieval tool should not return loose snippets. It should return `source_id`, `title`, `url`, `retrieved_at`, `score`, and `text`. A payment tool should not return "success." It should return `transaction_id`, `status`, `amount`, `currency`, `created_at`, and `requires_followup`. A failure should not be an unstructured exception. It should land in an error object.
+很多系统给工具输入写 schema，却让工具输出返回散文。这是陷阱。检索工具不应返回松散片段，而应返回来源 ID、标题、URL、检索时间、分数和正文。支付工具不应只返回“成功”，而应返回交易 ID、状态、金额、币种、创建时间和是否需要后续处理。失败也不应是不结构化异常，而应落进错误对象。
 
-Bidirectional structure enables testing and replay. You can record a tool call and see whether the model integrates the same result the same way after a model upgrade. You can measure timeout rate, empty-result rate, argument-repair rate, and tool-selection drift. None of that comes from telling the model "please be strict."
+双向结构支持测试和回放。你可以记录一次工具调用，看模型升级后是否能以相同方式整合同一个结果。你可以测超时率、空结果率、参数修复率和工具选择漂移。这些都不是一句“请严格一点”能得到的。
 
-Tool output is also an attack surface. Web pages, emails, tickets, repositories, and documents can contain instructions. The runtime must label tool output as data, not instruction. It must preserve source and trust level. It must prevent an untrusted page from silently causing a write action. Input schema is not enough. Output envelopes and trust tags are part of the same protocol boundary.
+工具输出也是攻击面。网页、邮件、工单、仓库和文档都可能包含指令。运行时必须把工具输出标记为数据，而不是指令。它必须保留来源和信任等级。它必须阻止不可信网页悄悄触发写操作。输入 schema 不够，输出信封和信任标签也是同一个协议边界的一部分。
 
-## Tool Choice Is Policy
+## 工具选择就是策略
 
-Argument generation gets most of the attention, but tool choice is also a policy decision. A system may expose `search_web`, `search_internal_docs`, `read_file`, `query_database`, `send_email`, and `create_ticket`. "Look this up" is not enough to decide among them. Public web is cheap and sometimes unreliable. Internal docs are more authoritative but permissioned. Databases may be current but expensive. Write tools can solve a problem and create side effects.
+参数生成最容易吸引注意，但工具选择同样是策略决策。系统可能暴露网页搜索、内部文档搜索、文件读取、数据库查询、发邮件、创建工单等工具。“查一下”不足以决定该用谁。公共网页便宜但未必可靠。内部文档更权威但有权限。数据库可能最新但成本高。写工具能解决问题，也能制造副作用。
 
-The runtime should annotate tools with capability, risk, cost, permission, and side effects. The model may propose candidate tools. Policy should filter them. Read-only tools can be freer. Write tools need confirmation. Cross-permission tools need authorization. High-cost tools need budget checks. If the system only records that a tool was called, it misses the important question: why was that tool allowed.
+运行时应给工具标注能力、风险、成本、权限和副作用。模型可以提出候选工具。策略层应过滤它们。只读工具可以更自由。写工具需要确认。跨权限工具需要授权。高成本工具需要预算检查。系统如果只记录工具被调用了，就漏掉了更重要的问题：它为什么被允许调用。
 
-Tool descriptions are part of this policy surface. A tool described as "search documents" will match too many tasks. "Search approved compliance policies updated by the compliance team" is more useful. The description is not just help text. It is routing input.
+工具描述也是策略表面。描述成“搜索文档”的工具会匹配太多任务。描述成“搜索由合规团队批准并更新的政策文档”更有用。描述不是帮助文本而已，它是路由输入。
 
-## Idempotency Decides Whether Retry Is Safe
+## 幂等性决定能不能安全重试
 
-Tools fail. Networks timeout. Services return 500. Rate limits trigger. Partial writes happen. A system that retries automatically must know whether retry is safe. Reading a file is safe. Querying weather is safe. Creating an order, sending email, charging a card, and posting a notification may not be safe.
+工具会失败。网络会超时。服务会返回 500。限流会触发。部分写入会发生。自动重试系统必须知道重试是否安全。读文件安全。查天气安全。创建订单、发邮件、扣款、发通知未必安全。
 
-Write tools should declare idempotency, `idempotency_key` support, dry-run support, rollback behavior, and confirmation requirements. The runtime should not ask the model whether to "try again" without knowing whether the previous attempt already changed state. The model cannot know that from prose. The tool envelope can.
+写工具应声明幂等性、幂等键支持、dry-run 支持、回滚行为和确认要求。运行时不应该在不知道上一次是否已经改变状态时，问模型要不要“再试一次”。模型无法从散文里知道这些，工具信封可以。
 
-Success is also not a single status. A service can accept a request and process it later. A deployment can start successfully and fail health checks. An email service can accept a message and later bounce it. The result object should distinguish `accepted`, `completed`, `failed`, `pending`, and `requires_confirmation`. Otherwise the model will conclude too early.
+成功也不是单一状态。服务可以接收请求但稍后处理。部署可以启动成功但健康检查失败。邮件服务可以接收消息但之后退信。结果对象应区分已接受、已完成、失败、处理中、需要确认。否则模型会过早下结论。
 
-## Schemas Evolve
+## Schema 会演化
 
-Function schemas are APIs. APIs evolve. Fields are added. Old fields are deprecated. Enums expand. Permissions change. If the tool layer has no version concept, schema changes create hidden failures. A prompt still asks for `user_id` while the tool expects `account_id`. A new enum value appears and the model never uses it. A required field is added and the model invents a value.
+函数 schema 是 API。API 会演化。字段会新增。旧字段会弃用。枚举会扩展。权限会变化。如果工具层没有版本概念，schema 变化会制造隐藏失败。提示词还在要 `user_id`，工具已经要 `account_id`。新枚举值出现，模型从不用它。新增必填字段，模型开始编值。
 
-Every tool needs a version. The description seen by the model should correspond to that version. Deprecated fields need a transition period. New required fields need a questioning path. Enum expansion needs evaluation examples. Schema changes need a changelog and regression tests. Traditional API design already learned this. Function calling moves those lessons into the model interface.
+每个工具都需要版本。模型看到的描述必须对应那个版本。弃用字段需要过渡期。新增必填字段需要询问路径。枚举扩展需要评估样例。Schema 变化需要变更日志和回归测试。传统 API 设计已经学过这些。函数调用只是把这些经验带进模型接口。
 
-## Human Confirmation Is Part of the Protocol
+## 人类确认是协议的一部分
 
-Automation culture often treats human confirmation as failure. In low-risk tasks, maybe. In high-risk tool use, confirmation is a protocol step. Before sending an email, show recipient, subject, body summary, and attachments. Before placing an order, show amount, item, and address. Before deployment, show environment, version, and rollback plan. The user should confirm an object, not a vague sentence.
+自动化文化常把人类确认看作失败。在低风险任务里也许如此。在高风险工具使用里，确认是协议步骤。发邮件前展示收件人、主题、正文摘要和附件。下单前展示金额、物品和地址。部署前展示环境、版本和回滚计划。用户确认的应该是对象，而不是一句含糊的话。
 
-The confirmation snapshot should be logged. Later, the system can say what the user approved. This adds friction in the right place: before side effects. The goal is not frictionless action. The goal is controlled action.
+确认快照应该进入日志。之后系统能说清用户到底批准了什么。这会在正确位置增加摩擦：副作用发生之前。目标不是无摩擦行动，而是受控行动。
 
-## The Interface Text Becomes System Behavior
+## 接口文字会变成系统行为
 
-Tool names, parameter names, descriptions, and error messages used to be internal developer text. In a model-facing tool system they become part of runtime behavior. A parameter called `q` is weaker than `search_query`. A boolean called `fast` is weaker than `response_mode: "fast" | "thorough"`. A `400 Bad Request` error is less repairable than `missing_required_field: date`.
+工具名、参数名、描述和错误消息过去像内部开发文本。模型面对工具时，它们就是运行时行为的一部分。参数叫 `q` 比叫 `search_query` 弱。布尔值叫 `fast` 比显式枚举弱。`400 Bad Request` 比 `missing_required_field: date` 更难修复。
 
-Function calling forces API design and prompt design to meet. The interface must explain itself because the model is one of its users. Bad API text creates bad model behavior. Good schema names and clear errors give the model a path to repair.
+函数调用迫使 API 设计和提示词设计相遇。接口必须解释自己，因为模型也是它的用户之一。坏 API 文本制造坏模型行为。好的 schema 名称和清楚错误会给模型修复路径。
 
-## Protocol Is the Gap Between Chat and Execution
+## 协议是聊天和执行之间的缝合层
 
-The significance of 2023 function calling was not that a chatbot could check the weather. That was the smallest demo. The significance was that model output could become a verifiable intermediate representation. It could be validated, rejected, approved, executed, replayed, and measured.
+2023 年函数调用的意义不是聊天机器人能查天气。这是最小演示。真正意义是，模型输出可以成为可验证的中间表示。它可以被验证、拒绝、批准、执行、回放和测量。
 
-Without that representation, AI applications struggle to leave the toy stage. Real systems care less about whether an answer sounds plausible and more about whether an action is correct, authorized, reversible, and attributable. Function calling is the bridge: prompt turns a task into a contract, RAG supplies evidence, and function calling turns intent into an action plan. The number of APIs is secondary. The protocol around each call is what makes the system maintainable.
+没有这个中间表示，AI 应用很难离开玩具阶段。真实系统关心的不只是答案听起来是否合理，而是动作是否正确、授权、可逆、可归因。函数调用就是桥梁：提示词把任务变成契约，RAG 提供证据，函数调用把意图变成动作计划。API 数量是次要的。每次调用周围的协议，才决定系统能不能维护。

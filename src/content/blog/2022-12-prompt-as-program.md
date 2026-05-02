@@ -1,109 +1,109 @@
 ---
-title: "Part 1 | Prompt as Program: Few-Shot Templates, Chain-of-Thought, and Structured Instructions"
-description: 'Prompt engineering in late 2022 was not spellcraft. Its durable lesson was that natural-language requests can be shaped into reusable, inspectable execution contracts.'
-deck: 'The sentence was never the interesting unit. The useful unit was the boundary around the call: task, variables, examples, constraints, checks, and a result the next system could actually use.'
+title: "第 1 篇 | 把提示词当作程序：少样本模板、思维链与结构化指令"
+description: "2022 年末的提示词工程不是咒语学。真正留下来的经验是：自然语言请求可以被整理成可复用、可检查、可维护的执行契约。"
+deck: "有价值的单位从来不是一句漂亮的话，而是一次调用周围的边界：任务、变量、示例、约束、检查，以及下一个系统能继续使用的结果。"
 date: 2022-12-15
 tags:
-  - prompt
-  - few-shot
-  - harness
+  - 提示词
+  - 少样本
+  - 执行框架
 use_math: false
 draft: false
 ---
 
-Prompt engineering was easy to misunderstand in late 2022. It looked like a writing trick. One person found a phrase that worked, another person copied it, and a third person wrapped it in a thread about magic words. That was the shallow version of the story. The deeper story was that prompts were becoming interfaces. They turned an open-ended request into a constrained call, with a task boundary, input slots, examples, output shape, and a place to check failure.
+2022 年末，提示词工程很容易被误读。表面上看，它像写作技巧。有人发现一句话有效，另一个人复制它，第三个人把它包装成“神奇咒语”。这是浅层故事。深层故事是，提示词开始变成接口。它把一个开放请求收束成一次有边界的调用，里面有任务、有输入槽、有例子、有输出形状，也有失败时该停在哪里的规则。
 
-Calling a prompt a program does not mean natural language suddenly became Python. It means something narrower. A program earns its place by being reusable, inspectable, and maintainable. A prompt that says "summarize this professionally" has none of those properties. A prompt that names the input, says what evidence is allowed, defines what fields must be returned, and explains when to refuse begins to look like an execution contract. It still runs on a probabilistic model. The boundary around it has changed from conversation to protocol.
+把提示词叫作程序，并不意味着自然语言突然变成了 Python。意思更窄。程序之所以成立，是因为它可以复用、检查和维护。一句“请专业地总结这段内容”没有这些性质。一个提示词如果命名输入，限定证据来源，定义返回字段，并说明何时拒绝，它就开始像执行契约。模型仍然是概率模型，但调用边界已经从聊天转向协议。
 
-That is the part worth keeping from the 2022 prompt wave. Not the exact phrase "think step by step." Not the legend of one perfect template. The important shift was that model behavior could be shaped by external structure. The [Chain-of-Thought Prompting](https://arxiv.org/abs/2201.11903) paper showed that demonstrations containing intermediate reasoning steps could improve performance on arithmetic, commonsense, and symbolic reasoning tasks. [Self-Consistency](https://arxiv.org/abs/2203.11171) showed that sampling multiple reasoning paths and selecting the most consistent answer could beat a single greedy path. The engineering lesson was not that every user should see the entire chain of reasoning. It was that reasoning traces, sampling policy, and selection rules could become part of the calling contract.
+这才是 2022 年提示词浪潮里值得保留的部分。不是“请一步步思考”这句话本身，也不是某个完美模板的传说。关键变化是：模型行为可以被外部结构塑形。[思维链提示](https://arxiv.org/abs/2201.11903) 的论文说明，包含中间推理步骤的示例可以改善算术、常识和符号推理任务。[自洽性采样](https://arxiv.org/abs/2203.11171) 进一步说明，生成多条推理路径并选择更一致的答案，可以超过单条贪心路径。工程启发不是让用户看见所有中间推理，而是把推理轨迹、采样策略和选择规则纳入调用契约。
 
-## A Spell Cannot Be Maintained
+## 咒语不能维护
 
-The worst team prompt is not the one that fails. It is the one that works but cannot be explained. Someone pastes a long prompt into a shared document and writes, "This version is stable." Two weeks later the model changes, the input distribution changes, and the output drifts. The next maintainer has no way to know whether the stable part was the role sentence, the examples, the final warning, or a lucky interaction between all of them. That is not an asset. It is folklore.
+最糟糕的团队提示词不是失败的那一个，而是有效但说不清为什么有效的那一个。有人把一大段提示词贴到共享文档里，说“这个版本稳定”。两周后模型变了，输入分布变了，输出漂了。下一个维护者不知道真正起作用的是角色句、示例、最后警告，还是它们之间某种偶然互动。这不是资产，这是民间经验。
 
-A maintainable prompt separates responsibilities. The task statement says what should happen. The input slots say where variables enter. The examples show the local mapping from input to output. The output contract says what downstream code can parse. The checks say when the model should stop or downgrade. Once those responsibilities are separated, failures become easier to locate. A classification miss points to task wording or examples. A missing field points to the output contract. Fabricated evidence points to evidence rules or refusal conditions.
+可维护的提示词会分离责任。任务说明负责说清要做什么。输入槽负责变量从哪里进入。示例负责展示局部映射。输出契约负责让下游代码知道如何读取。检查规则负责告诉模型什么时候停下或降级。一旦责任分开，故障就容易定位。分类错了，查任务 wording 或示例。字段缺失，查输出契约。证据编造，查证据规则和拒绝条件。
 
-The simplest contract is not beautiful:
+一个朴素的契约可以长这样：
 
 ```text
-task:
-  Turn the meeting transcript into a decision memo.
+任务：
+  把会议记录整理成决策备忘录。
 
-input:
-  transcript: raw meeting notes
-  audience: target reader
-  constraints: extra user constraints
+输入：
+  会议记录：原始会议文本
+  读者：目标读者
+  约束：用户额外要求
 
-rules:
-  Only record decisions supported by the transcript.
-  If the owner is unclear, write "unspecified" instead of inventing a name.
-  Preserve absolute dates from the source.
+规则：
+  只记录会议文本支持的决策。
+  负责人不明确时写“未指定”，不要编造人名。
+  保留来源中的绝对日期。
 
-output:
-  decisions: array of decisions
-  owners: array of owners
-  risks: unresolved risks
-  missing: missing information
+输出：
+  决策列表
+  负责人列表
+  未解决风险
+  缺失信息
 ```
 
-There is no charm in that text. Its value is that every part can be changed and tested. The transcript can change. The audience can change. The rules can be challenged. The output can be read by another program. Prompt engineering starts here. It is not about sounding human. It is about moving the model into a constrained execution space.
+这段文字没有魅力。它的价值在于每一部分都能被修改和测试。会议记录可以变。读者可以变。规则可以被挑战。输出可以交给另一个程序。提示词工程从这里开始。它不是让模型更像人说话，而是把模型放进受约束的执行空间。
 
-## Few-Shot Examples Define a Local Distribution
+## 少样本示例定义局部分布
 
-Few-shot prompting is often described as "giving the model some examples." That description is too weak. The examples define a local distribution inside the context window. If the fields, rhythm, labels, and output shape are consistent, the next input is pulled toward that local pattern. If the examples are inconsistent, the distribution widens and the model starts mixing styles that should have stayed separate.
+少样本提示常被说成“给模型几个例子”。这个说法太弱。例子在上下文窗口里定义一个局部分布。如果字段、节奏、标签和输出形状一致，下一个输入会被拉向这个局部模式。如果例子互相矛盾，分布会变宽，模型就会混合本该分开的风格。
 
-The first rule of few-shot design is not more examples. It is homogeneity. The input fields should match. The label granularity should match. The output length should match. Failure handling should match. If one example puts uncertainty in `missing` and another hand-waves with "probably Alice," the model learns hesitation, not a task. Many templates fail not because the model does not understand the domain, but because the examples quietly contradict one another.
+少样本设计的第一条规则不是更多例子，而是同质。输入字段要匹配。标签粒度要匹配。输出长度要匹配。失败处理也要匹配。如果一个例子把不确定性写进“缺失信息”，另一个例子却写“可能是 Alice”，模型学到的不是任务，而是犹豫。很多模板不是因为模型不懂领域而失败，而是因为例子在暗处互相冲突。
 
-The second rule is to cover boundaries rather than averages. A template with only successful examples often trains the model to answer when it should stop. Negative examples are usually more valuable. What happens when the owner is missing. What happens when two source lines conflict. What happens when the user asks for something outside the material. These cases are more like engineering assets than polished demos because production failures rarely live on the happy path.
+第二条规则是覆盖边界，而不是覆盖平均情况。只有成功案例的模板，会训练模型在应该停下时继续回答。负例通常更有价值。负责人缺失怎么办。两条来源冲突怎么办。用户要求超出材料怎么办。这些案例比漂亮演示更像工程资产，因为生产问题很少只发生在顺风路径上。
 
-The third rule is budget discipline. Early context windows were small, so every example displaced real input or checks. Larger context windows did not remove the problem. They made it easier to hide bad examples inside a larger prompt. A few high-signal examples are usually better than a pile of weakly related ones. One should show the normal path. One should show missing information. One should show conflict. One should show refusal. The prompt stays shorter, but the boundary becomes sharper.
+第三条规则是预算纪律。早期上下文窗口很小，每个例子都会挤掉真实输入或检查规则。更大的窗口没有消除这个问题，只是让坏例子更容易被藏进长提示词里。几个高信号示例通常胜过一堆弱相关示例。一个展示正常路径，一个展示缺失信息，一个展示冲突，一个展示拒绝。提示词更短，边界反而更硬。
 
-## Chain-of-Thought Is Not a Monologue for the User
+## 思维链不是给用户看的长独白
 
-Chain-of-thought was also easy to misread. The research result was that intermediate reasoning demonstrations can help sufficiently large models solve harder tasks. The product mistake was to conclude that all intermediate reasoning should be printed to the user. That creates two problems. The trace can be long and noisy. Worse, a generated trace is not the same thing as evidence. A model can write a coherent explanation for a wrong answer.
+思维链也容易被误读。研究结果是，中间推理示例可以帮助足够大的模型解决更难任务。产品错误是，把这个结果理解成“所有中间推理都应该展示给用户”。这会带来两个问题。轨迹可能又长又吵。更糟的是，生成出来的推理轨迹不等于证据。模型可以为一个错误答案写出流畅解释。
 
-A better design separates internal checking from external delivery. The internal layer can ask for assumptions, calculations, evidence mapping, and counterexamples. The external layer should expose only what the user can inspect: conclusion, source, limitation, and next action. This is not hiding thought. It is turning thought into runtime machinery. The user gets a checkable answer. The system keeps enough trace to debug failure.
+更好的设计是分离内部检查和外部交付。内部层可以要求假设、计算、证据映射和反例。外部层只暴露用户能检查的东西：结论、来源、限制和下一步。这不是隐藏思考，而是把思考变成运行时机械。用户拿到可检查答案，系统保留足够的调试信息。
 
-This already pointed toward harness design. The model should not face the user request naked. It should run inside a control structure that decides when to slow down, when to sample multiple candidates, when to call a tool, and when to refuse. Prompting was the lightest early expression of that control structure.
+这个方向已经指向执行框架。模型不应该赤手面对用户请求。它应该运行在控制结构里，由控制结构决定什么时候放慢，什么时候采样多个候选，什么时候调用工具，什么时候拒绝。提示词只是这种控制结构最早、最轻的一种表达。
 
-## Self-Consistency Added a Selector
+## 自洽性引入了选择器
 
-Self-consistency was not just "ask the model several times." Asking three times and choosing the smoothest answer is still taste. The useful move is to separate generation from selection. Generation allows multiple reasoning paths. Selection evaluates answer convergence, evidence coverage, field completeness, and rule violations.
+自洽性不是简单地“多问几次”。问三次然后选最顺眼的答案，仍然只是品味。真正有用的是把生成和选择分开。生成阶段允许多条路径。选择阶段评估答案是否收敛、证据是否覆盖、字段是否完整、规则是否被违反。
 
-This looks less like a magic accuracy trick and more like property-based testing. A single output may be accidentally correct. Multiple samples reveal whether the task boundary is stable. If ten samples produce three different owners for the same meeting note, the problem is probably not temperature. The input lacks evidence or the template lacks a rule for owner selection. If the conclusion is stable but the evidence field is missing, the output contract is weak. If every path is fluent but the conclusions conflict, the task may need a tool or a human decision.
+这更像性质测试，而不是魔法般的准确率技巧。单个输出可能偶然正确。多个样本会暴露任务边界是否稳定。如果十个样本为同一份会议记录给出三个不同负责人，问题很可能不是温度，而是输入缺证据或模板缺少负责人选择规则。如果结论稳定但证据字段缺失，是输出契约弱。如果每条路径都流畅但结论冲突，任务可能需要工具或人类决策。
 
-Self-consistency made the prompt a tiny workflow. It had a template, samples, an aggregation policy, and a checker. Later agents and workflow runners made the same pattern larger. The principle was already present: do not trust one free-form generation when the task can be decomposed into generation and verification.
+自洽性让提示词变成一个小工作流。它有模板、有样本、有聚合策略、有检查器。后来的智能体和工作流运行器把这个模式做大了，但原则已经在那里：当任务可以拆成生成和验证时，不要信任一次自由生成。
 
-## Structured Instructions Make Output Usable
+## 结构化指令让输出可用
 
-Another early failure was pleasant output that no system could use. The user asked for invoice fields and received a paragraph. The user asked for risks and received risks, evidence, and advice mixed into one block. Humans can read that. Programs cannot. If a downstream system cannot parse the answer, the prompt has not finished its job.
+另一个早期失败是输出好读但系统不可用。用户要发票字段，模型给了一段话。用户要风险列表，模型把风险、证据和建议混在一个段落里。人可以读，程序不能读。如果下游系统不能解析答案，提示词还没有完成工作。
 
-Structured output is not format vanity. It is a responsibility boundary. Field names tell downstream code where to read. Types tell validators what is illegal. Enums prevent the model from inventing new states. Missing fields give the system a clean failure mode. Even before strict JSON schema support became common, the direction was clear: the goal was not a pretty answer. The goal was a result that could enter a machine-checkable boundary.
+结构化输出不是格式洁癖，而是责任边界。字段名告诉下游代码去哪里读。类型告诉验证器什么不合法。枚举阻止模型发明新状态。缺失字段给系统一个干净的失败模式。在严格 JSON Schema 普及之前，方向就已经清楚：目标不是漂亮答案，而是一个能进入机器检查边界的结果。
 
-A meeting memo prompt that asks for "concise professional writing" gives you no diagnostic handle. A prompt that asks for `decision`, `owner`, `deadline`, `evidence_quote`, and `confidence` gives you several. A missing owner is extraction failure. A non-ISO deadline is format failure. An evidence quote absent from the source is evidence failure. A confidence field that is always high is calibration failure. Specific errors create specific repairs.
+让会议备忘录提示词返回“简洁专业写作”，没有任何诊断抓手。让它返回“决策、负责人、截止日期、证据原句、置信度”，就有了多个抓手。负责人缺失是抽取失败。截止日期不是标准格式是格式失败。证据原句不在来源里是证据失败。置信度永远很高是校准失败。具体错误带来具体修复。
 
-## Prompt Changes Are Control-Plane Changes
+## 提示词改动是控制面改动
 
-Prompt edits are often treated like copy edits because they are text. In an AI system, one sentence can change business behavior. Replacing "may infer" with "must only use source material" changes the evidence policy. Replacing "briefly answer" with "explain in detail" changes cost and latency. Replacing "refuse if needed" with "never refuse" changes risk. A prompt is not ordinary prose. It is control-plane configuration.
+提示词因为是文字，常被当作普通文案来改。可在 AI 系统里，一句话会改变业务行为。把“可以推断”改成“只能使用来源材料”，改变的是证据政策。把“简短回答”改成“详细解释”，改变的是成本和延迟。把“必要时拒绝”改成“永不拒绝”，改变的是风险。提示词不是普通散文，它是控制面配置。
 
-That means prompts deserve version control, review, and regression examples. A prompt diff should be read for responsibility changes, not just wording. If a refusal condition is added, add refusal tests. If a field is removed, inspect downstream parsing. If an example changes, ask whether the output distribution changes. If a variable name changes, check whether logs or tools depended on the old name.
+因此，提示词需要版本控制、评审和回归样例。读提示词 diff，要读责任变化，而不只是措辞变化。新增拒绝条件，就新增拒绝测试。移除字段，就检查下游解析。修改示例，就问输出分布是否变化。修改变量名，就检查日志和工具是否依赖旧名。
 
-Model upgrades make this stricter. If the model and the prompt change at the same time, you cannot attribute behavior drift. A cleaner rollout fixes the prompt while testing a new model, then fixes the model while testing a new prompt. When both must change, keep a comparison set. Without that discipline, "the new version is better" is usually just a feeling.
+模型升级会让这件事更严格。如果模型和提示词同时变化，就无法归因行为漂移。更干净的做法是固定提示词测试新模型，再固定模型测试新提示词。如果必须同时变，就保留对照集。没有这种纪律，“新版本更好”通常只是感觉。
 
-## Teams Need Prompt Owners
+## 团队需要提示词负责人
 
-Personal prompts can be fixed by the person who wrote them. Team prompts need owners. Someone must decide who can edit the template, who approves a change, who maintains examples, and who decides whether a failure belongs to the model, the prompt, the retrieval layer, or a downstream parser. A prompt with no owner becomes a configuration file with no owner. It works until it matters.
+个人提示词可以由作者自己修。团队提示词需要负责人。谁能改模板，谁批准变更，谁维护示例，谁判断故障属于模型、提示词、检索层还是下游解析器，这些都要有人负责。没有负责人的提示词，就是没有负责人的配置文件。它会一直工作，直到它变得重要。
 
-The owner does not need to know every domain detail. The owner maintains the boundary. The template should match the task. The examples should cover real edges. The output should match downstream contracts. Each change should have a reason. In support, finance, legal, medical, and code-generation workflows, a prompt sentence can change what the system does. Treating it as casual copy underestimates the risk.
+负责人不必知道每个领域细节。负责人维护边界。模板要匹配任务。示例要覆盖真实边缘。输出要匹配下游契约。每个变更都要有原因。在客服、金融、法律、医疗和代码生成工作流里，提示词一句话可以改变系统行为。把它当作随手文案，是低估风险。
 
-Ownership also means deletion. Many prompts grow by patch accretion. Every incident adds a sentence to the end. Months later the template is full of duplicates, stale exceptions, and hidden conflicts. Long is not stable. Long is often just unmaintained. A good owner compresses the prompt, moves deterministic work to tools or schemas, and keeps natural language responsible only for the semantic boundary it can actually carry.
+所有权也意味着删除。很多提示词靠补丁堆积生长。每次事故后都在结尾加一句。几个月后，模板里全是重复、过期例外和隐藏冲突。长不等于稳定，长常常只是没人维护。好的负责人会压缩提示词，把确定性工作移到工具或 schema 里，让自然语言只承担它真正能承担的语义边界。
 
-That boundary matters because some failures cannot be fixed by more wording. Missing evidence needs retrieval. Arithmetic needs a tool. Permission risk needs policy. Format drift needs schema. If every failure is pushed back into the prompt, the prompt becomes a landfill. A good prompt knows where it ends.
+有些失败不能靠更多文字修复。缺证据需要检索。算术需要工具。权限风险需要政策。格式漂移需要 schema。如果所有失败都被塞回提示词，提示词就会变成垃圾场。好的提示词知道自己在哪里结束。
 
-## The Reusable Part Is the Failure Boundary
+## 可复用的部分是失败边界
 
-The lesson to carry forward from late 2022 is not a favorite phrase. It is the habit of writing failure boundaries into the call. A good prompt tells the model when to answer and when not to answer. It tells the model how to use examples and what to do when the examples do not cover the case. It tells the model what to output and tells the next system how to reject bad output.
+2022 年末真正该留下的，不是某句喜欢的话，而是把失败边界写进调用里的习惯。好的提示词会告诉模型什么时候回答，什么时候不回答。它会说明如何使用示例，以及示例不覆盖当前情况时怎么办。它会定义输出，也会告诉下一个系统如何拒绝坏输出。
 
-That is the split between toy prompts and production prompts. A toy prompt optimizes for the first surprising answer. A production prompt optimizes for the thousandth answer still being explainable. The first is rhetoric. The second is an interface. Prompt engineering mattered because it made the act of calling a model into something designable, reviewable, and portable.
+这就是玩具提示词和生产提示词的区别。玩具提示词追求第一次惊艳答案。生产提示词追求第一千次答案仍然能被解释。前者是修辞，后者是接口。提示词工程之所以重要，是因为它把“调用模型”这件事变成了可设计、可评审、可迁移的工程对象。
 
-For everyday work, this changes the first question. Do not start with "make this better." Start with what the input is, who will use the output, what evidence is allowed, which cases require refusal, and what fields the next system needs. That prompt may look plain. Plain is fine. Engineering begins when the call survives contact with the next person who has to maintain it.
+日常工作里，第一问也应该改变。不要从“把它写好一点”开始。先问输入是什么，输出给谁用，允许哪些证据，哪些情况必须拒绝，下一个系统需要哪些字段。这样的提示词可能很朴素。朴素没关系。工程从调用能被下一个维护者接住时开始。

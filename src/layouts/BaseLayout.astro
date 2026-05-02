@@ -19,7 +19,7 @@ const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -71,20 +71,20 @@ const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`
             <span>{site.affiliation}</span>
           </span>
         </a>
-        <nav class="site-nav" aria-label="Primary">
-          <a href="/">Home</a>
-          <a href="/#education">Education</a>
-          <a href="/#publications">Publications</a>
-          <a href="/projects/">Projects</a>
-          <a href="/blog/">Blog</a>
-          <a href="/notes/">Notes</a>
-          <a href={site.scholar} target="_blank" rel="noreferrer">Scholar</a>
-          <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
+        <nav class="site-nav" aria-label="主导航">
+          <a href="/">首页</a>
+          <a href="/#education">教育经历</a>
+          <a href="/#publications">论文</a>
+          <a href="/projects/">项目</a>
+          <a href="/blog/">博客</a>
+          <a href="/notes/">笔记</a>
+          <a href={site.scholar} target="_blank" rel="noreferrer">学术主页</a>
+          <a href={site.github} target="_blank" rel="noreferrer">代码主页</a>
         </nav>
       </header>
       <slot />
       <footer class="site-footer">
-        <p>© Taotao Zhao. Academic homepage and project archive.</p>
+        <p>© Taotao Zhao。个人学术主页与项目档案。</p>
       </footer>
     </div>
     <script>

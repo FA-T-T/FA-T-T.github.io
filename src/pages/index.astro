@@ -7,66 +7,66 @@ import { site } from "@data/site";
 const publications = [
   {
     year: "2025",
-    title: "HiQC: hybrid quantum classical deep learning with parameter efficient quantum modules",
-    venue: "Quantum Machine Intelligence",
+    title: "HiQC：面向参数高效量子模块的量子-经典混合深度学习",
+    venue: "《量子机器智能》",
     link: ""
   },
   {
     year: "2024",
-    title: "Energy Efficiency of Wireless-Powered Cell-Free mMIMO With Hardware Impairments",
-    venue: "IEEE Transactions on Communications",
+    title: "存在硬件损伤时无线供能无蜂窝大规模 MIMO 的能效研究",
+    venue: "IEEE 通信汇刊",
     link: "http://dx.doi.org/10.1109/tcomm.2024.3369724"
   },
   {
     year: "2023",
-    title: "Energy-Efficient Federated Learning Over Cell-Free IoT Networks: Modeling and Optimization",
-    venue: "IEEE Internet of Things Journal",
+    title: "无蜂窝物联网网络中的能效联邦学习：建模与优化",
+    venue: "IEEE 物联网期刊",
     link: "https://doi.org/10.1109/JIOT.2023.3273619"
   },
   {
     year: "2022",
-    title: "A Fault-Tolerant Transmission Scheme in SDN-Based Industrial IoT over Fiber-Wireless Networks",
+    title: "面向光纤-无线融合工业物联网的 SDN 容错传输方案",
     venue: "Entropy",
     link: "http://dx.doi.org/10.3390/e24020157"
   },
   {
     year: "2022",
-    title: "Cell-Free Massive MIMO with Energy-Efficient Downlink Operation in Industrial IoT",
+    title: "工业物联网中无蜂窝大规模 MIMO 的能效下行操作",
     venue: "Mathematics",
     link: "https://doi.org/10.3390/math10101687"
   }
 ];
 
 const researchInterests = [
-  "Quantum computing and parameterized quantum circuits",
-  "Hybrid quantum-classical models",
-  "Optimization and trainability of deep variational models",
-  "Structural conditions under which optimization remains informative"
+  "量子计算与参数化量子线路",
+  "量子-经典混合模型",
+  "深层变分模型的优化与可训练性",
+  "决定优化信息含量的结构性条件"
 ];
 
 const education = [
   {
-    period: "2024 - expected 2028",
-    degree: "Engineering Doctorate in Electronic Information",
-    school: "School of Electronic Science and Engineering, Southeast University",
-    detail: "Currently enrolled."
+    period: "2024 - 预计 2028",
+    degree: "电子信息工程博士",
+    school: "东南大学电子科学与工程学院",
+    detail: "在读。"
   },
   {
-    period: "Master's",
-    degree: "Information and Communication Engineering",
-    school: "School of Information Science and Technology, Nantong University",
-    detail: "Research on physical-layer resource allocation for wireless communication and federated learning."
+    period: "硕士",
+    degree: "信息与通信工程",
+    school: "南通大学信息科学技术学院",
+    detail: "研究无线通信与联邦学习中的物理层资源分配。"
   },
   {
-    period: "Bachelor's",
-    degree: "Electronic Science and Technology",
-    school: "School of Information Science and Technology, Nantong University",
+    period: "本科",
+    degree: "电子科学与技术",
+    school: "南通大学信息科学技术学院",
     detail: ""
   }
 ];
 ---
 
-<BaseLayout title="Academic Homepage" description={site.description} bodyClass="home-page academic-home">
+<BaseLayout title="个人主页" description={site.description} bodyClass="home-page academic-home">
   <main>
     <section class="academic-hero reveal">
       <aside class="profile-card academic-profile">
@@ -74,21 +74,21 @@ const education = [
         <h1>Taotao Zhao</h1>
         <p>{site.profileLine}</p>
         <div class="profile-links">
-          <a href={site.scholar} target="_blank" rel="noreferrer">Google Scholar</a>
-          <a href={site.orcid} target="_blank" rel="noreferrer">ORCID</a>
-          <a href={site.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a href={site.scholar} target="_blank" rel="noreferrer">学术主页</a>
+          <a href={site.orcid} target="_blank" rel="noreferrer">研究者标识</a>
+          <a href={site.github} target="_blank" rel="noreferrer">代码主页</a>
         </div>
       </aside>
 
       <div class="academic-intro">
-        <p class="eyebrow">Academic Homepage</p>
+        <p class="eyebrow">个人主页</p>
         <h2>Taotao Zhao</h2>
         <p class="affiliation">{site.affiliation}</p>
         <p>
-          My work is broadly concerned with quantum computing, optimization, and learning systems. Recent interests center on parameterized quantum circuits, hybrid quantum-classical models, and the structural conditions under which optimization remains informative.
+          我的研究关注量子计算、优化与学习系统。近期兴趣集中在参数化量子线路、量子-经典混合模型，以及优化过程在什么结构条件下仍然携带有效信息。
         </p>
         <p>
-          Earlier work studied optimization in wireless-powered cell-free massive MIMO, federated learning over IoT networks, and reliability in industrial communication systems. Across these topics, the recurring question is how system structure changes what can be optimized.
+          早期工作研究无线供能无蜂窝大规模 MIMO、物联网联邦学习以及工业通信系统可靠性。贯穿这些方向的问题是：系统结构如何改变可优化对象本身。
         </p>
       </div>
     </section>
@@ -96,8 +96,8 @@ const education = [
     <section id="education" class="section reveal">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Education</p>
-          <h2>Education</h2>
+          <p class="eyebrow">教育经历</p>
+          <h2>教育经历</h2>
         </div>
       </div>
       <div class="education-list">
@@ -119,8 +119,8 @@ const education = [
     <section id="interests" class="section reveal">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Research</p>
-          <h2>Research Interests</h2>
+          <p class="eyebrow">研究</p>
+          <h2>研究兴趣</h2>
         </div>
       </div>
       <div class="interest-list">
@@ -131,8 +131,8 @@ const education = [
     <section id="publications" class="section reveal">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Publications</p>
-          <h2>Selected Publications</h2>
+          <p class="eyebrow">论文</p>
+          <h2>代表论文</h2>
         </div>
       </div>
       <div class="publication-list">
@@ -159,10 +159,10 @@ const education = [
     <section id="repositories" class="section reveal">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Repositories</p>
-          <h2>Repositories</h2>
+          <p class="eyebrow">项目</p>
+          <h2>项目组合</h2>
         </div>
-        <a class="note-index-link" href="/projects/">Open Project Browser</a>
+        <a class="note-index-link" href="/projects/">查看项目</a>
       </div>
       <div class="project-grid">
         {projects.map((project) => <ProjectCard project={project} />)}

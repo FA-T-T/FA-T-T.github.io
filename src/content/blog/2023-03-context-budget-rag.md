@@ -1,124 +1,124 @@
 ---
-title: "Part 2 | Context Budget: RAG Chunking, Reranking, and Signal Ordering"
-description: 'The hard part of RAG is not retrieving related text. It is deciding which evidence deserves scarce context and what responsibility each token carries.'
-deck: 'Larger context windows did not remove the engineering problem. They changed it from "can we fit the material" to "which material has the right to influence the answer."'
+title: "第 2 篇 | 上下文预算：检索增强生成的分块、重排与信号排序"
+description: "检索增强生成的难点不是找几段相关文本，而是决定哪些证据有资格占用稀缺上下文，以及每个词元应该承担什么责任。"
+deck: "更长的上下文窗口没有消灭工程问题，只是把问题从“材料能不能放进去”改成了“哪些材料有权影响答案”。"
 date: 2023-03-20
 tags:
-  - context
-  - rag
-  - retrieval
+  - 上下文
+  - 检索增强生成
+  - 检索
 use_math: false
 draft: false
 ---
 
-RAG looks simple in a demo. Split documents into chunks, embed them, retrieve top-k, paste the chunks into a prompt, and let the model answer. The pipeline is easy to explain and easy to prototype. It breaks as soon as the material becomes real. Failure does not always come from missing the relevant document. It often comes from placing stale evidence, half a definition, a near miss from another product, an unattributed summary, and a piece of old conversation state into the same context window. The model is not answering from evidence. It is guessing which part of a noisy room should count as evidence.
+RAG 在演示里很简单。把文档切块，向量化，取 top-k，把片段贴进提示词，再让模型回答。这个流程容易解释，也容易做原型。材料一真实，它就开始断。失败不总是因为没找到相关文档。更多时候，是把旧证据、半个定义、另一个产品的近似说明、没有归属的摘要和一段旧对话状态塞进同一个上下文窗口。模型不是在证据上回答，而是在嘈杂房间里猜哪句话算证据。
 
-The important 2023 shift was not that vector retrieval finally worked. It was that context became a budget. Every token has an opportunity cost. More conversation history means less room for evidence. Longer evidence blocks mean fewer candidates. A fact placed in the middle of a long context may be less usable than the same fact placed near the beginning or end. [Lost in the Middle](https://arxiv.org/abs/2307.03172) made this concrete: long-context models can accept large inputs without using all positions equally well.
+2023 年的关键变化不是向量检索终于能用了，而是上下文成了预算。每个词元都有机会成本。更多对话历史意味着更少证据空间。更长证据块意味着更少候选。一个事实如果埋在长上下文中间，可能不如放在开头或结尾好用。[Lost in the Middle](https://arxiv.org/abs/2307.03172) 把这件事讲得很具体：长上下文模型可以接收大输入，但并不会同等使用所有位置。
 
-The original [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401) paper already identified the pressure. Parametric models contain knowledge but are hard to update and inspect. Retrieval can bring external knowledge into generation time and attach sources. Once teams built production systems around that idea, another fact became obvious: external knowledge is not clean by default. Retrieval brings candidates to the door. Context construction decides who enters, where they sit, and how much authority they get.
+原始的 [检索增强生成](https://arxiv.org/abs/2005.11401) 论文已经指出压力所在。参数模型有知识，但难更新、难检查。检索可以把外部知识带到生成时刻，并附上来源。当团队围绕这个想法构建生产系统后，另一个事实变得明显：外部知识默认并不干净。检索把候选带到门口。上下文构造决定谁能进来、坐在哪里、拥有多大权威。
 
-## Fixed Chunks Turn Boundary Errors into Recall Errors
+## 固定分块把边界错误变成召回错误
 
-Early RAG pipelines often used fixed-size chunks. Cut every 500 tokens with 50 tokens of overlap. The method is simple and cheap to index. It also cuts across semantic boundaries. A definition may begin in one chunk and the exception may fall into the next. A table header may be separated from the rows. A code sample may lose its import or error handler. The retrieval system says it found a relevant chunk. The answer system receives half a fact.
+早期 RAG 管线常用固定大小分块。每 500 个 token 切一次，重叠 50 个 token。方法简单，索引便宜，但会切断语义边界。定义可能从一个块开始，例外落在下一个块。表头可能和表格行分开。代码样例可能丢掉 import 或错误处理。检索系统说它找到了相关块，回答系统拿到的却是半个事实。
 
-Half a fact is more dangerous than no fact. Suppose a user asks whether an order can be refunded. The system retrieves "orders can be refunded within seven days" but misses the following sentence, "customized items are excluded." The model gives a confident yes because the context contains a yes. That is not the cartoon version of hallucination. It is evidence truncation. The model did not invent a policy. The system handed it an incomplete policy.
+半个事实比没有事实更危险。用户问一个订单能不能退款。系统检索到“订单可在七天内退款”，却漏掉下一句“定制商品除外”。模型自信回答可以，因为上下文里确实有“可以”。这不是卡通式幻觉。它是证据截断。模型没有凭空编政策，系统递给了它一条不完整政策。
 
-Structure-aware chunking exists to reduce that failure. Headings, paragraphs, lists, tables, code blocks, and FAQ pairs are closer to responsibility boundaries than token counts. A refund rule should stay with its exceptions. An API parameter table should keep headers with rows. A code example should keep setup, call, and error handling together. The closer the chunk is to a self-contained unit of meaning, the more likely it can bear evidential weight.
+结构感知分块就是为了降低这种失败。标题、段落、列表、表格、代码块和问答对，比 token 数更接近责任边界。退款规则应当带着例外。API 参数表应当让表头和行在一起。代码例子应当保留准备、调用和错误处理。分块越像一个自足的意义单元，它越能承担证据责任。
 
-Structure-aware chunking is not magic. It depends on parsing quality. Markdown, HTML, PDF, scanned documents, and exported knowledge bases all have different dirty edges. A parser can mistake footers for body text, page headers for section headings, or tables for broken paragraphs. The practical design is not to worship a chunker. It is to preserve raw location, parent heading, neighboring chunks, document version, and source metadata so that retrieval can expand around a hit instead of treating one fragment as complete.
+结构感知分块也不是魔法。它依赖解析质量。Markdown、HTML、PDF、扫描件和导出的知识库都有各自脏边。解析器可能把页脚当正文，把页眉当章节标题，把表格拆成破碎段落。实用设计不是崇拜某个 chunker，而是保留原始位置、父级标题、相邻块、文档版本和来源元数据，让检索命中后能向周围扩展，而不是把单个碎片当完整事实。
 
-## Vector Similarity Only Answers "Does This Look Related?"
+## 向量相似只回答“看起来相关吗”
 
-Vector retrieval is good at semantic neighborhood. It is weaker at applicability. A stale policy and a new policy can be very similar. A historical discussion of an error code and a current fix note can be very similar. A general deployment guide and today’s failing CI log can be very similar. If the system only asks which text looks related, it will confuse topicality with decision value.
+向量检索擅长语义邻近，不擅长判断适用性。旧政策和新政策可能非常相似。某个错误码的历史讨论和当前修复说明可能非常相似。通用部署指南和今天失败的 CI 日志也可能非常相似。如果系统只问哪段文字看起来相关，它就会把主题相近误当成决策价值。
 
-That is why reranking became central. First-stage retrieval can be broad. It should bring back candidates. The second stage must be pickier. It should decide which candidates deserve the budget. Good reranking uses more than embedding similarity: freshness, source type, version, field match, entity alignment, permissions, and task type. Policy questions need time and authority. Code questions need version and environment. Medical, legal, and financial questions need source class and scope.
+这就是重排变得重要的原因。第一阶段检索可以宽一点，它负责带回候选。第二阶段必须挑剔，它负责决定哪些候选值得占用预算。好的重排不只看 embedding 相似度，还看新鲜度、来源类型、版本、字段匹配、实体对齐、权限和任务类型。政策问题需要时间和权威。代码问题需要版本和环境。医疗、法律、金融问题需要来源类别和适用范围。
 
-A useful context candidate is not just text:
+一个有用的上下文候选不只是文本：
 
 ```json
 {
-  "text": "Customized items are not covered by the seven-day refund policy.",
+  "text": "定制商品不适用七天退款政策。",
   "source": "refund_policy_v4.md",
-  "section": "Exceptions",
+  "section": "例外情况",
   "updated_at": "2023-03-12",
   "doc_version": "v4",
   "retrieval_score": 0.78,
   "rerank_score": 0.93,
-  "entities": ["customized items", "seven-day refund"],
-  "applies_to": ["retail", "customized_goods"]
+  "entities": ["定制商品", "七天退款"],
+  "applies_to": ["零售", "定制商品"]
 }
 ```
 
-Those fields are not decoration. They explain why the candidate should enter the context. If two passages are similar, prefer the newer one. If two are new, prefer the one with entity match. If both match, prefer the official policy over a comment thread. Without these signals, RAG becomes a semantic paste machine.
+这些字段不是装饰。它们说明候选为什么应该进入上下文。两段都相似，就优先新的。两段都新，就优先实体匹配的。两段都匹配，就优先官方政策而不是评论线程。没有这些信号，RAG 就只是语义粘贴机。
 
-## A Bigger Window Changes the Shape of the Budget
+## 更大的窗口改变预算形状
 
-It is tempting to think large context windows make RAG simpler. They do reduce one kind of pain. You can fit more history and more documents. But capacity is not attention, and capacity is not noise control. Large windows can hide failure. With a small window, the system visibly runs out of space. With a large one, the system may quietly bury the decisive evidence inside twenty similar passages and still produce a fluent answer.
+很容易以为大上下文窗口会让 RAG 更简单。它确实缓解了一类痛苦。你可以放下更多历史和更多文档。但容量不是注意力，容量也不是噪声控制。大窗口会隐藏失败。小窗口会显式告诉你空间不够。大窗口可能悄悄把决定性证据埋在二十段相似材料里，然后仍然产出流畅答案。
 
-Budgeting becomes more important because the failure becomes less obvious. A sane context design separates several budgets. The task budget carries the user question, role, constraints, and output format. The evidence budget carries retrieved passages and metadata. The state budget carries conversation summary, open decisions, and user preferences. The audit budget carries source IDs, retrieval time, ranking scores, and excluded evidence. These budgets serve different responsibilities. Mixing all of them into one long prompt lets responsibilities contaminate each other.
+预算因此更重要。合理的上下文设计会分出几种预算。任务预算放用户问题、角色、约束和输出格式。证据预算放检索片段和元数据。状态预算放对话摘要、未决决定和用户偏好。审计预算放来源 ID、检索时间、排名分数和被排除证据。这些预算承担不同责任。把它们混进一个长提示词，只会让责任互相污染。
 
-The proportions should change by task. Question answering needs more evidence. Writing needs more style and structure. Long-running workflows need more state. High-risk work needs more audit. There is no universal ratio. There is only a runtime policy that decides what the answer needs to be trustworthy.
+比例应当随任务变化。问答需要更多证据。写作需要更多风格和结构。长工作流需要更多状态。高风险工作需要更多审计。没有万能比例。只有运行时策略：决定一个可信答案需要什么。
 
-## Summaries Should Preserve State, Not Just Shorten Text
+## 摘要应保存状态，而不只是缩短文本
 
-The common shortcut is to summarize long material and call the budget problem solved. Bad summaries delete the branch conditions that matter. In policies, contracts, code changes, and experiment logs, the decisive information often lives in exceptions, versions, applicable scope, conflicts, and unresolved questions. Remove those and the model will make a cleaner mistake.
+常见捷径是把长材料总结一下，然后宣称预算问题解决了。坏摘要会删掉真正重要的分支条件。在政策、合同、代码变更和实验日志里，决定性信息常在例外、版本、适用范围、冲突和未解决问题中。删掉这些，模型会犯更干净的错误。
 
-A useful compression target is not "shorter text." It is decision state. A state summary should separate confirmed facts, unresolved facts, conflicting evidence, next retrieval questions, and user constraints. It should not sand uncertainty into a smooth paragraph. If a summary layer erases uncertainty, downstream generation treats the uncertainty as absent.
+有用的压缩目标不是“更短文本”，而是“决策状态”。状态摘要应当分开已确认事实、未确认事实、冲突证据、下一步检索问题和用户约束。它不应该把不确定性磨平成顺滑段落。如果摘要层抹掉了不确定性，下游生成会把不确定性当作不存在。
 
-For a research workflow, the state may look like this:
+研究工作流里的状态可以这样写：
 
 ```text
-confirmed:
-  The user wants a comparison of context-budget problems in RAG engineering after 2023.
-open_questions:
-  Whether to cover specific frameworks is not yet decided.
-conflicts:
-  Some sources argue large windows reduce pipeline complexity.
-  Others show long-context position sensitivity.
-next_retrieval:
-  Find evidence on position sensitivity in multi-document QA.
+已确认：
+  用户想比较 2023 年之后 RAG 工程里的上下文预算问题。
+未决问题：
+  是否覆盖具体框架还没有决定。
+冲突：
+  一些来源认为大窗口降低管线复杂度。
+  另一些工作显示长上下文存在位置敏感性。
+下一步检索：
+  查找多文档问答中位置敏感性的证据。
 ```
 
-That is not a shorter document. It is working memory. It tells the next retrieval step what to search for and tells generation which claims cannot be written as settled facts.
+这不是更短的文档，而是工作记忆。它告诉下一次检索该找什么，也告诉生成层哪些主张还不能写成定论。
 
-## Query Rewriting Is the First Budget Allocation
+## 查询改写是第一次预算分配
 
-RAG discussions often focus on documents and ignore the query. Before a user question reaches retrieval, it may need rewriting. The goal is not nicer prose. The goal is harder retrieval keys. "Why did this break today?" is not enough. The system needs the module, date, error class, version, and whether "break" means exception, latency, or wrong output.
+RAG 讨论常盯着文档，却忽略查询。用户问题到达检索前，可能需要改写。目标不是让文字更好看，而是产生更硬的检索键。“为什么今天坏了”不够。系统需要模块、日期、错误类别、版本，以及“坏了”是异常、延迟还是错误输出。
 
-Good query rewriting expands references, time, entities, and task type. If session state contains the current project, include it. If the user says "today," convert it to an absolute date. If the user pastes a log, extract error codes, function names, and versions. If the user asks "can I," the retrieval should look for rules and exceptions. The rewritten query should make the retrieval system less dependent on guesswork.
+好的查询改写会展开指代、时间、实体和任务类型。如果会话状态里有当前项目，就带上项目。如果用户说“今天”，就转成绝对日期。如果用户贴日志，就抽取错误码、函数名和版本。如果用户问“我能不能”，检索就应当寻找规则和例外。改写后的查询应减少检索系统猜测。
 
-Query rewriting can also damage the task. It can over-interpret the user, convert an open question into a closed one, or treat a hypothesis as a fact. Preserve the original query, the rewritten query, and the rewrite reason. When the answer fails, you can tell whether the original request was ambiguous or the rewrite layer bent it in the wrong direction.
+查询改写也可能伤害任务。它可能过度解释用户，把开放问题改成封闭问题，或把假设当事实。因此要保留原始查询、改写查询和改写理由。答案失败时，你才能判断是原始请求模糊，还是改写层把它带偏了。
 
-## Metadata Is Retrieval's Second Language
+## 元数据是检索的第二语言
 
-Many systems index only body text. Body text matters, but metadata often decides whether evidence can be used. Title, section, author, update time, version, permission scope, product line, language, and source credibility all affect applicability. Without metadata, the reranker must infer institutional status from prose. It will mix drafts with approved policies, historical notes with current rules, and discussion threads with specifications.
+很多系统只索引正文。正文当然重要，但元数据常决定证据是否可用。标题、章节、作者、更新时间、版本、权限范围、产品线、语言和来源可信度，都会影响适用性。没有元数据，重排器只能从文字里猜制度地位。它会把草稿和已批准政策混在一起，把历史记录和当前规则混在一起，把讨论帖和规范混在一起。
 
-Metadata reduces model burden. Do not ask the model to determine freshness from twenty passages if the index can rank by document version first. Do not ask the model to infer authority if sources can be labeled. The model should synthesize text, not compensate for absent data governance. RAG reliability comes as much from upstream content hygiene as from generation.
+元数据减少模型负担。不要让模型从二十段话里判断新旧，如果索引本来可以先按版本排序。不要让模型推断权威性，如果来源可以被标注。模型应该综合文本，而不是替缺失的数据治理擦屁股。RAG 的可靠性很大一部分来自上游内容卫生，而不只是生成。
 
-Document lifecycle is part of that hygiene. Drafts can be indexed, but should be labeled as drafts. Deprecated documents can be kept, but should be downranked and marked historical. Official documents should carry release status, time, and scope. Temporary announcements should expire. Without lifecycle fields, a RAG system exposes the organization’s knowledge mess directly to the user.
+文档生命周期也是卫生的一部分。草稿可以入库，但必须标成草稿。废弃文档可以保留，但应当降权并标历史。官方文档要带发布状态、时间和范围。临时公告要过期。没有生命周期字段，RAG 系统会把组织知识里的混乱直接暴露给用户。
 
-## Evaluation Must Decompose the Pipeline
+## 评估必须拆开管线
 
-If RAG evaluation only asks whether the final answer is correct, it cannot locate failure. A wrong answer may come from query rewriting, recall, reranking, compression, context ordering, generation, or citation. One accuracy number turns all of those into fog.
+如果 RAG 评估只问最终答案对不对，就无法定位失败。错答案可能来自查询改写、召回、重排、压缩、上下文排序、生成或引用。一个准确率数字会把所有问题变成雾。
 
-Evaluation should decompose. First ask whether the gold evidence appears in top-N retrieval. Then ask whether it survives reranking into the final context. Then ask whether the context keeps enough semantic boundary and source metadata. Then ask whether generation uses the evidence correctly, handles conflict, and names missing information. Finally ask whether key claims cite the right source.
+评估应该拆开。先看标准证据是否出现在 top-N 检索里。再看它是否经过重排进入最终上下文。再看上下文是否保留足够语义边界和来源元数据。然后看生成是否正确使用证据、处理冲突、说明缺失信息。最后看关键主张是否引用正确来源。
 
-This catches accidental correctness. The model may answer from parametric memory even when retrieval failed. It may retrieve the right evidence and cite the wrong source. It may answer correctly but ignore scope. If you only score the final prose, these failures disappear until the next case breaks.
+这能抓住偶然正确。模型可能在检索失败时凭参数记忆答对。它可能检索到正确证据，却引用错误来源。它可能结论正确但忽略范围。只评分最终 prose，这些失败会消失，直到下一个案例爆掉。
 
-## Refusal Is a RAG Capability
+## 拒绝也是 RAG 能力
 
-RAG systems should answer from evidence. That means they must also know when not to answer. If the evidence is missing, the system should not produce a firm conclusion. If sources conflict and no rule resolves the conflict, it should name the conflict. If the user’s question is outside the indexed domain, it should say so instead of falling back to parametric memory.
+RAG 系统应当基于证据回答。这也意味着它必须知道什么时候不答。如果证据缺失，系统不应给出坚定结论。如果来源冲突且没有规则解决冲突，就应命名冲突。如果用户问题超出索引领域，就应说明范围，而不是回退到参数记忆。
 
-Refusal must be tied to risk. A low-risk encyclopedia answer can offer a qualified summary. Legal, medical, financial, compliance, and code-deployment questions need stricter evidence thresholds. If retrieval finds only an old version of a migration guide, the system can say what it found and recommend checking version differences. It should not issue current commands as if the evidence were current.
+拒绝要跟风险绑定。低风险百科问题可以给限定性总结。法律、医疗、金融、合规和代码部署问题需要更高证据阈值。如果检索只找到旧版本迁移指南，系统可以说找到了什么，并建议确认版本差异。它不应该像证据仍然当前一样给出命令。
 
-A good refusal is not a dead end. It tells the user what is missing: a version number, an error log, a policy link, a jurisdiction, a contract clause, or a permission scope. The refusal becomes the next input. A bad refusal says only "I cannot answer."
+好的拒绝不是死胡同。它告诉用户缺什么：版本号、错误日志、政策链接、司法辖区、合同条款或权限范围。拒绝就变成下一次输入。坏拒绝只说“我不能回答”。
 
-The same signal helps the content system. Frequent refusals due to missing versions indicate weak metadata. Frequent refusals due to conflict indicate knowledge-base governance problems. Frequent refusals due to unclear permissions indicate access control has not entered retrieval. Refusal is not just a safety behavior. It is a diagnostic.
+同一个信号也帮助内容系统。因为缺少版本而频繁拒绝，说明元数据弱。因为来源冲突而频繁拒绝，说明知识库治理有问题。因为权限不清而频繁拒绝，说明访问控制没有进入检索。拒绝不只是安全行为，它是诊断。
 
-## The Opposite of RAG Is Not No Retrieval
+## RAG 的反面不是不检索
 
-A model with no retrieval can be stale. A model with unbounded retrieval can be worse. It can produce a sourced answer from sources that should not have been used. The first looks like closed-book uncertainty. The second looks like open-book confidence with the wrong book.
+没有检索的模型可能过时。无限制检索的模型可能更糟。它会从本不该使用的来源里产出“有来源”的答案。前者像闭卷不确定，后者像拿错书的开卷自信。
 
-Mature RAG answers four questions. How do we chunk without breaking semantic responsibility. How do we rank without confusing similarity with applicability. How do we allocate context without burying the decisive evidence. How do we cite and refuse so that inference does not masquerade as fact. Missing any one of those, the system can look smart in a demo and become unreviewable in real work.
+成熟的 RAG 要回答四个问题。如何分块而不破坏语义责任。如何排序而不把相似性误作适用性。如何分配上下文而不埋掉决定性证据。如何引用和拒绝，让推断不伪装成事实。漏掉任何一个，系统都可能在演示里聪明，在真实工作里不可评审。
 
-For personal use, the lesson is plain. Do not dump ten documents into a model and call it research. First define the question, the decision criteria, the source types, and the missing-information policy. Then ask for evidence, conflicts, gaps, and only then a conclusion. You are not building a chatbot with a larger memory. You are building a small evidence allocation system.
+个人使用时，经验很简单。不要把十份文档扔进模型就叫研究。先定义问题、决策标准、来源类型和缺失信息策略。再要求证据、冲突、空白，最后才要结论。你不是在造一个记忆更大的聊天机器人。你在造一个小型证据分配系统。

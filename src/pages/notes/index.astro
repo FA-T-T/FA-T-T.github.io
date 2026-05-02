@@ -5,11 +5,11 @@ import { formatEntryDate, loadMarkdownEntries, type MarkdownModule } from "../..
 const notes = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../content/notes/**/*.md"), "notes");
 ---
 
-<BaseLayout title="Notes" description="Research note archive." bodyClass="notes-page">
+<BaseLayout title="笔记" description="研究笔记归档。" bodyClass="notes-page">
   <main class="paper-main">
     <article class="paper-sheet reveal">
-      <p class="paper-kicker">Notes</p>
-      <h1>Research Notes</h1>
+      <p class="paper-kicker">笔记</p>
+      <h1>研究笔记</h1>
       {
         notes.length > 0 ? (
           <div class="paper-note-list">
@@ -24,10 +24,10 @@ const notes = await loadMarkdownEntries(import.meta.glob<MarkdownModule>("../../
         ) : (
           <>
             <p>
-              No public Markdown notes are listed yet. Add files under <code>src/content/notes/</code> and they will appear here.
+              目前还没有公开 Markdown 笔记。把文件加入 <code>src/content/notes/</code> 后，它们会出现在这里。
             </p>
             <p>
-              The visual language here is intentionally closer to paper than dashboard: narrow measure, quiet margins, and text-first reading.
+              这里的视觉语言更接近论文而不是仪表盘：窄行宽、安静留白、优先服务长文本阅读。
             </p>
           </>
         )

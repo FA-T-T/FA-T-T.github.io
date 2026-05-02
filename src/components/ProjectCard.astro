@@ -5,7 +5,15 @@ interface Project {
   kind: string;
   summary: string;
   focus: string;
+  tagline?: string;
+  status?: string;
   tags?: string[];
+  theme?: {
+    accent?: string;
+    accent2?: string;
+    surface?: string;
+    soft?: string;
+  };
 }
 
 interface Props {
@@ -13,13 +21,23 @@ interface Props {
 }
 
 const { project } = Astro.props;
+const style = [
+  project.theme?.accent && `--project-accent: ${project.theme.accent}`,
+  project.theme?.accent2 && `--project-accent-2: ${project.theme.accent2}`,
+  project.theme?.surface && `--project-surface: ${project.theme.surface}`,
+  project.theme?.soft && `--project-soft: ${project.theme.soft}`
+]
+  .filter(Boolean)
+  .join("; ");
 ---
 
-<a class="project-card" href={`/projects/${project.slug}/`}>
+<a class="project-card project-card-showcase" href={`/projects/${project.slug}/`} style={style}>
   <span class="card-kicker">{project.kind}</span>
   <h3>{project.title}</h3>
+  <strong>{project.tagline ?? project.focus}</strong>
   <p>{project.summary}</p>
-  <div class="tag-row" aria-label="Project tags">
+  <div class="tag-row" aria-label="项目标签">
     {(project.tags ?? []).slice(0, 3).map((tag) => <span>{tag}</span>)}
   </div>
+  <span class="project-card-status">{project.status ?? "项目页面"}</span>
 </a>

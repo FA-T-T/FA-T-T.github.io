@@ -1,0 +1,26 @@
+---
+import type { MarkdownHeading } from "../lib/writing";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const chapters = Astro.props.headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+---
+
+<nav class="chapter-nav" aria-label="文章章节">
+  <p class="rail-kicker">章节</p>
+  {
+    chapters.length > 0 ? (
+      <ol>
+        {chapters.map((heading) => (
+          <li class={`chapter-depth-${heading.depth}`}>
+            <a href={`#${heading.slug}`}>{heading.text}</a>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="rail-empty">暂无章节。</p>
+    )
+  }
+</nav>

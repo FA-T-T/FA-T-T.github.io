@@ -1,50 +1,207 @@
 [
   {
+    "slug": "bilin",
+    "title": "Bilin",
+    "kind": "科研论文阅读工作流",
+    "repo": "FA-T-T/bilin",
+    "branch": "main",
+    "sourceUrl": "https://github.com/FA-T-T/bilin",
+    "sync": false,
+    "showRepositoryBrowser": false,
+    "summary": "Bilin 把科研论文从硬啃英文 PDF 变成结构化地阅读、翻译、提问、记录和复盘；它保留原文结构，也把阅读过程留在本地 library 中。",
+    "tagline": "给科研入门者的神器",
+    "focus": "结构化论文阅读、块级翻译、证据问答、本地复盘",
+    "audience": "面向科研工作者、研究生、大学生，以及刚进入新领域、需要先用母语建立研究理解再回到英文原文校准的读者。",
+    "status": "公开仓库",
+    "repositoryStatus": "已在 GitHub 公开",
+    "repositoryNote": "源码已公开，可在 GitHub 查看项目实现与使用说明。",
+    "theme": {
+      "accent": "#62e6b5",
+      "accent2": "#77a7ff",
+      "surface": "#101a22",
+      "soft": "#172633"
+    },
+    "heroPoints": [
+      "结构化阅读",
+      "块级翻译缓存",
+      "段落与全文问答",
+      "讲义笔记导出"
+    ],
+    "metrics": [
+      { "value": "结构", "label": "章节、段落、公式、图表、caption 和术语" },
+      { "value": "本地", "label": "PDF、TeX、缓存、问答和笔记留在 library" },
+      { "value": "复盘", "label": "讲义笔记、Markdown 与 bundle 导出" }
+    ],
+    "story": [
+      {
+        "title": "不是替代原文，而是铺平阅读路径",
+        "body": "Bilin 不把论文压成泛泛的 AI 摘要，也不试图替代英文原文。它把论文拆成章节、段落、公式、图表、caption、术语、问答和讲义笔记，让读者沿着原文结构一步步理解。"
+      },
+      {
+        "title": "把分散动作合到同一个本地工作流",
+        "body": "读者可以导入 arXiv 或本地 TeX 包，解析段落级 Markdown，按块翻译和缓存，保留多个翻译版本，管理专业术语，围绕当前段落或整篇论文提问，再把回答沉淀成讲义笔记。"
+      },
+      {
+        "title": "给非英语母语的科研入门者一层缓冲",
+        "body": "很多初学者不是不够聪明，而是被英语长句、领域术语、公式上下文和论文写法同时卡住。先用母语理解背景、动机、关键公式、实验逻辑和局限，再回到英文原文校准术语与表达，通常更高效。"
+      },
+      {
+        "title": "严肃阅读仍然回到原文",
+        "body": "Bilin 适合作为科研入门的第一阅读层。它帮助读者从“看不下去”进入“知道问题、动机、方法和需要回看原文的段落”。真正严肃的阅读仍然要回到英文原文、公式、图表和引用链。"
+      }
+    ],
+    "tags": ["论文阅读", "本地工作流", "块级翻译", "科研入门"]
+  },
+  {
     "slug": "genqc",
     "title": "genQC",
-    "kind": "repository",
+    "kind": "量子研究工具包",
     "repo": "FA-T-T/genQC",
     "branch": "main",
     "sourceUrl": "https://github.com/FA-T-T/genQC",
-    "summary": "Generative Quantum Circuits. This is the main public repository for the current quantum research line.",
-    "focus": "Quantum circuits, generative modeling, research prototypes",
+    "summary": "面向生成式量子线路实验的研究工具包，让模型想法、可运行线路和可复现实验产物保持在同一个工程边界内。",
+    "tagline": "把生成式量子线路做成可执行的研究对象。",
+    "focus": "量子线路、生成式建模、研究原型",
+    "audience": "面向探索生成结构、线路设计和可实验化量子工作流的研究者。",
+    "status": "公开仓库",
+    "repositoryStatus": "已在 GitHub 公开",
+    "theme": {
+      "accent": "#66d9ef",
+      "accent2": "#f0c674",
+      "surface": "#111b2a",
+      "soft": "#18273a"
+    },
+    "heroPoints": ["线路生成", "实验脚手架", "量子工作流", "仓库可追踪"],
+    "metrics": [
+      { "value": "93", "label": "仓库文件已索引用于预览" },
+      { "value": "49", "label": "可预览源码与文档产物" },
+      { "value": "公开", "label": "GitHub 源码可访问" }
+    ],
+    "story": [
+      {
+        "title": "从想法到线路产物",
+        "body": "这个项目围绕可执行研究来组织：线路对象、配置和实验路径应当可见，而不是让方法停留在脱离代码的描述里。"
+      },
+      {
+        "title": "适合作为研究中枢",
+        "body": "项目故事下方保留仓库浏览器，代码、笔记和安装文件都可以在站内直接检查。"
+      }
+    ],
     "featuredPaths": ["README.md", "requirements.txt", "environment.yml", "setup.py"],
-    "tags": ["quantum", "research", "repository"]
+    "tags": ["量子", "生成式线路", "研究工具"]
   },
   {
     "slug": "vqls-prototype",
     "title": "vqls-prototype",
-    "kind": "repository",
+    "kind": "算法原型",
     "repo": "FA-T-T/vqls-prototype",
     "branch": "main",
     "sourceUrl": "https://github.com/FA-T-T/vqls-prototype",
-    "summary": "A compact Qiskit-based VQLS prototype, useful as a small example project with runnable source files.",
-    "focus": "VQLS, Qiskit, prototype workflow",
+    "summary": "一个紧凑的 Qiskit VQLS 原型，把变分线性求解器路径压到足够小，便于检查、运行和改造。",
+    "tagline": "一条真正能顺着读完的 VQLS 路径。",
+    "focus": "VQLS、Qiskit、原型工作流",
+    "audience": "面向需要小而清楚的量子线性求解示例，而不是大型研究代码库的构建者。",
+    "status": "公开仓库",
+    "repositoryStatus": "已在 GitHub 公开",
+    "theme": {
+      "accent": "#ffb86b",
+      "accent2": "#7cc7ff",
+      "surface": "#21180f",
+      "soft": "#2d2116"
+    },
+    "heroPoints": ["Qiskit 路径", "小表面积", "可运行原型", "线性求解聚焦"],
+    "metrics": [
+      { "value": "76", "label": "仓库文件已索引用于预览" },
+      { "value": "57", "label": "可预览源码与文档产物" },
+      { "value": "VQLS", "label": "聚焦算法族" }
+    ],
+    "story": [
+      {
+        "title": "重点是可检查性",
+        "body": "原型的价值在于读者能理解完整路径。这个项目把 VQLS 工作流控制在足够紧凑的范围内，便于直接检查。"
+      },
+      {
+        "title": "为改造而建",
+        "body": "项目页面把源码浏览放在宣传文案旁边，让仓库既能作为演示，也能成为新的起点。"
+      }
+    ],
     "featuredPaths": ["README.md", "requirements.txt", "main.py"],
-    "tags": ["VQLS", "Qiskit", "prototype"]
+    "tags": ["VQLS", "Qiskit", "原型"]
   },
   {
     "slug": "variational-quantum-linear-solver",
     "title": "Variational Quantum Linear Solver",
-    "kind": "repository",
+    "kind": "研究仓库",
     "repo": "FA-T-T/Variational-Quantum-Linear-Solver",
     "branch": "main",
     "sourceUrl": "https://github.com/FA-T-T/Variational-Quantum-Linear-Solver",
-    "summary": "A public VQLS repository that can be browsed as an independent project from the personal site.",
-    "focus": "Variational quantum algorithms and linear systems",
+    "summary": "一个公开的 VQLS 仓库，以独立项目页组织变分量子线性系统实验。",
+    "tagline": "把变分线性求解包装成清晰可见的项目。",
+    "focus": "变分量子算法与线性系统",
+    "audience": "面向比较 VQA 线性系统实现方式和实验布局的读者。",
+    "status": "公开仓库",
+    "repositoryStatus": "已在 GitHub 公开",
+    "theme": {
+      "accent": "#8bd17c",
+      "accent2": "#70b7ff",
+      "surface": "#111f17",
+      "soft": "#172b20"
+    },
+    "heroPoints": ["VQA 方法线", "线性系统", "公开源码", "研究档案"],
+    "metrics": [
+      { "value": "280", "label": "仓库文件已索引用于预览" },
+      { "value": "34", "label": "可预览源码与文档产物" },
+      { "value": "VQA", "label": "变分算法聚焦" }
+    ],
+    "story": [
+      {
+        "title": "独立的 VQLS 参考点",
+        "body": "项目把变分线性求解材料整理成独立公开入口，便于浏览、引用和横向比较。"
+      },
+      {
+        "title": "仓库上下文仍然可见",
+        "body": "故事下方的源码浏览器保留 README、安装文件和实现文件，让它们成为同一段项目叙事的一部分。"
+      }
+    ],
     "featuredPaths": ["README.md", "requirements.txt"],
-    "tags": ["VQA", "linear solver", "repository"]
+    "tags": ["VQA", "线性求解", "仓库"]
   },
   {
     "slug": "quantum-computing",
     "title": "Quantum-Computing",
-    "kind": "repository",
+    "kind": "知识档案",
     "repo": "FA-T-T/Quantum-Computing",
     "branch": "master",
     "sourceUrl": "https://github.com/FA-T-T/Quantum-Computing",
-    "summary": "A broader public notebook and note repository for quantum computing material.",
-    "focus": "Quantum computing notes, examples, and experiments",
+    "summary": "一个更宽的公开笔记与示例仓库，用来沉淀量子计算示例、参考资料和探索性材料。",
+    "tagline": "把量子计算笔记架做成可浏览的公共入口。",
+    "focus": "量子计算笔记、示例和实验",
+    "audience": "面向想查看有组织的量子计算笔记和示例，而不是单一成品包的读者。",
+    "status": "公开仓库",
+    "repositoryStatus": "已在 GitHub 公开",
+    "theme": {
+      "accent": "#d6a3ff",
+      "accent2": "#9ee6ff",
+      "surface": "#1b1728",
+      "soft": "#271f3a"
+    },
+    "heroPoints": ["笔记", "示例", "实验", "公开档案"],
+    "metrics": [
+      { "value": "40", "label": "仓库文件已索引用于预览" },
+      { "value": "38", "label": "可预览源码与文档产物" },
+      { "value": "档案", "label": "笔记本式材料" }
+    ],
+    "story": [
+      {
+        "title": "更宽的学习表面",
+        "body": "这个项目不是单一产品，更像是一组量子计算材料档案。按主题和文件直接浏览，反而更能体现它的价值。"
+      },
+      {
+        "title": "源码就是界面",
+        "body": "项目页先给出档案定位，再保留仓库浏览器供读者直接检查。"
+      }
+    ],
     "featuredPaths": ["README.md"],
-    "tags": ["quantum", "notes", "examples"]
+    "tags": ["量子", "笔记", "示例"]
   }
 ]

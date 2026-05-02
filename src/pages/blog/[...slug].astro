@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
+import ArticleChapters from "../../components/ArticleChapters.astro";
+import CommentsPanel from "../../components/CommentsPanel.astro";
 import { formatEntryDate, loadMarkdownEntries, type MarkdownModule, type WritingEntry } from "../../lib/writing";
 
 export async function getStaticPaths() {
@@ -16,20 +18,28 @@ const formattedDate = entry.data.date ? formatEntryDate(entry.data.date, "long")
 ---
 
 <BaseLayout title={entry.data.title} description={entry.data.description} bodyClass="blog-page" useMath={entry.data.use_math}>
-  <main class="article-main">
-    <article class="article-shell reveal">
-      <a class="back-link" href="/blog/">Back to blog</a>
-      <header class="article-header">
-        <p class="eyebrow">Blog{formattedDate && ` / ${formattedDate}`}</p>
-        <h1 class="article-title">{entry.data.title}</h1>
-        {entry.data.deck && <p class="article-deck">{entry.data.deck}</p>}
-      </header>
-      <div class="article-meta-row">
-        {entry.data.tags.map((tag) => <span class="meta-pill">{tag}</span>)}
-      </div>
-      <div class="article-body">
-        <Content />
-      </div>
-    </article>
+  <main class="article-main article-main-rails">
+    <div class="article-layout">
+      <aside class="article-rail article-rail-left">
+        <ArticleChapters headings={entry.headings} />
+      </aside>
+      <article class="article-shell">
+        <a class="back-link" href="/blog/">返回博客</a>
+        <header class="article-header">
+          <p class="eyebrow">博客{formattedDate && ` / ${formattedDate}`}</p>
+          <h1 class="article-title">{entry.data.title}</h1>
+          {entry.data.deck && <p class="article-deck">{entry.data.deck}</p>}
+        </header>
+        <div class="article-meta-row">
+          {entry.data.tags.map((tag) => <span class="meta-pill">{tag}</span>)}
+        </div>
+        <div class="article-body">
+          <Content />
+        </div>
+      </article>
+      <aside class="article-rail article-rail-right">
+        <CommentsPanel title={entry.data.title} slug={entry.slug} />
+      </aside>
+    </div>
   </main>
 </BaseLayout>
