@@ -53,155 +53,109 @@
     "tags": ["论文阅读", "本地工作流", "块级翻译", "科研入门"]
   },
   {
-    "slug": "genqc",
-    "title": "genQC",
-    "kind": "量子研究工具包",
-    "repo": "FA-T-T/genQC",
+    "slug": "codex-noval-2-manga",
+    "title": "小说到漫画",
+    "kind": "小说到漫画生产工具链",
+    "repo": "FA-T-T/codex-noval-2-manga",
     "branch": "main",
-    "sourceUrl": "https://github.com/FA-T-T/genQC",
-    "summary": "面向生成式量子线路实验的研究工具包，让模型想法、可运行线路和可复现实验产物保持在同一个工程边界内。",
-    "tagline": "把生成式量子线路做成可执行的研究对象。",
-    "focus": "量子线路、生成式建模、研究原型",
-    "audience": "面向探索生成结构、线路设计和可实验化量子工作流的研究者。",
+    "sourceUrl": "https://github.com/FA-T-T/codex-noval-2-manga",
+    "sync": false,
+    "showRepositoryBrowser": false,
+    "summary": "codex-noval-2-manga 把小说、短篇、章节摘录或原创故事材料整理成直接渲染漫画生产包：剧本、视觉设计、角色参考、页面提示词、逐页渲染命令和质量检查。",
+    "tagline": "让普通作者也能把小说推向漫画形态",
+    "focus": "Codex 技能包、直接渲染漫画脚本、人物参考、页面提示词",
+    "audience": "面向小说作者、世界观创作者、漫画化实验者，以及想把长篇文字推进到漫画页和影视分镜资产的个人创作者。",
     "status": "公开仓库",
     "repositoryStatus": "已在 GitHub 公开",
+    "repositoryNote": "源码、安装脚本、技能包和直接渲染示例已公开，可在 GitHub 查看。",
     "theme": {
-      "accent": "#66d9ef",
-      "accent2": "#f0c674",
-      "surface": "#111b2a",
-      "soft": "#18273a"
+      "accent": "#ff6b8a",
+      "accent2": "#f2c94c",
+      "surface": "#20141c",
+      "soft": "#2a1a24"
     },
-    "heroPoints": ["线路生成", "实验脚手架", "量子工作流", "仓库可追踪"],
+    "heroPoints": [
+      "小说改编脚本",
+      "视觉设计锁",
+      "角色参考图",
+      "逐页渲染提示词"
+    ],
     "metrics": [
-      { "value": "93", "label": "仓库文件已索引用于预览" },
-      { "value": "49", "label": "可预览源码与文档产物" },
-      { "value": "公开", "label": "GitHub 源码可访问" }
+      { "value": "4 个技能", "label": "总控技能与三个模块化漫画生产技能" },
+      { "value": "10 页", "label": "直接英文对白示例漫画页与页面提示词" },
+      { "value": "1088x1536", "label": "示例直接渲染页面规格" }
     ],
     "story": [
       {
-        "title": "从想法到线路产物",
-        "body": "这个项目围绕可执行研究来组织：线路对象、配置和实验路径应当可见，而不是让方法停留在脱离代码的描述里。"
+        "title": "它不是一键替代创作",
+        "body": "这个项目没有把创作伪装成按钮。真正有价值的仍然是故事判断、人物压力、镜头选择和连续性管理。仓库解决的是另一件事：把小说材料变成可复制、可检查、可迭代的漫画生产路径。"
       },
       {
-        "title": "适合作为研究中枢",
-        "body": "项目故事下方保留仓库浏览器，代码、笔记和安装文件都可以在站内直接检查。"
+        "title": "Codex 负责把故事翻译成生产语言",
+        "body": "工作流会把故事拆成漫画页脚本、共享风格 DESIGN.md、人物参考、页面提示词、渲染命令和质量检查。图像模型负责生成页面，Codex 负责把故事压力、场景连续性、道具证据链和对白经济性写成模型能执行的指令。"
+      },
+      {
+        "title": "选择直接渲染路线",
+        "body": "当前推荐路线不是先画单独分镜草图，而是先写详细页面脚本，再建立稳定视觉设计和人物参考，最后生成符合 GPT Image 2 / Image 2 页面渲染方式的提示词。早期漫画生产里，这条路线通常更容易保持自然构图和角色一致性。"
+      },
+      {
+        "title": "让改编机会提前到作者手里",
+        "body": "过去，小说通常要等待读者、市场和成功之后才可能进入漫画或动画。这个项目把第一步压低到个人创作者可以尝试的程度：先写小说，再生成漫画生产包，再把稳定的漫画页和镜头语言继续推进到影视分镜资产。"
       }
     ],
-    "featuredPaths": ["README.md", "requirements.txt", "environment.yml", "setup.py"],
-    "tags": ["量子", "生成式线路", "研究工具"]
+    "tags": ["小说改漫画", "Codex 技能", "直接渲染", "创作者工具"]
   },
   {
-    "slug": "vqls-prototype",
-    "title": "vqls-prototype",
-    "kind": "算法原型",
-    "repo": "FA-T-T/vqls-prototype",
+    "slug": "codex-skill-academic-slides",
+    "title": "学术展示生成",
+    "kind": "学术汇报与科研图像技能",
+    "repo": "FA-T-T/codex-skill-academic-slides",
     "branch": "main",
-    "sourceUrl": "https://github.com/FA-T-T/vqls-prototype",
-    "summary": "一个紧凑的 Qiskit VQLS 原型，把变分线性求解器路径压到足够小，便于检查、运行和改造。",
-    "tagline": "一条真正能顺着读完的 VQLS 路径。",
-    "focus": "VQLS、Qiskit、原型工作流",
-    "audience": "面向需要小而清楚的量子线性求解示例，而不是大型研究代码库的构建者。",
+    "sourceUrl": "https://github.com/FA-T-T/codex-skill-academic-slides",
+    "sync": false,
+    "showRepositoryBrowser": false,
+    "summary": "codex-skill-academic-slides 是一个面向学术汇报、论文讲解、科研 poster 和系统架构图的 Codex Skill，把论文、TeX 项目、Word 文档或 Markdown 材料转成统一风格的 image-native 展示产物。",
+    "tagline": "把论文材料变成能直接汇报的学术视觉稿",
+    "focus": "学术 slides、proofsheet、poster、系统架构图、真实 figure 保真嵌入",
+    "audience": "面向需要快速准备组会汇报、论文复现说明、投稿前内部讲解、项目 proposal、系统方法图和科研 poster 的研究者。",
     "status": "公开仓库",
     "repositoryStatus": "已在 GitHub 公开",
+    "repositoryNote": "源码、模板、脚本和 Codex Skill 主说明已公开，可在 GitHub 查看。",
     "theme": {
-      "accent": "#ffb86b",
-      "accent2": "#7cc7ff",
-      "surface": "#21180f",
-      "soft": "#2d2116"
+      "accent": "#4f8cff",
+      "accent2": "#50d4d8",
+      "surface": "#101827",
+      "soft": "#172235"
     },
-    "heroPoints": ["Qiskit 路径", "小表面积", "可运行原型", "线性求解聚焦"],
+    "heroPoints": [
+      "论文转汇报",
+      "真实图像保真",
+      "风格约束",
+      "一键打包 PPTX"
+    ],
     "metrics": [
-      { "value": "76", "label": "仓库文件已索引用于预览" },
-      { "value": "57", "label": "可预览源码与文档产物" },
-      { "value": "VQLS", "label": "聚焦算法族" }
+      { "value": "4 模式", "label": "完整 deck、proofsheet、poster、架构图" },
+      { "value": "保真", "label": "真实实验图、公式图和截图优先确定性嵌入" },
+      { "value": "PPTX", "label": "输出 deck、校样、contact sheet 与页面图片" }
     ],
     "story": [
       {
-        "title": "重点是可检查性",
-        "body": "原型的价值在于读者能理解完整路径。这个项目把 VQLS 工作流控制在足够紧凑的范围内，便于直接检查。"
+        "title": "重点不是伪可编辑，而是展示保真",
+        "body": "这个技能不追求把生成后的图片反向还原成 PowerPoint 文本框。它的判断更实际：学术展示首先需要视觉一致性、内容保真和结构清楚。真实论文图、实验曲线、公式图、架构图和截图优先以原始像素确定性嵌入，避免模型重绘造成数字、坐标轴或作者意图漂移。"
       },
       {
-        "title": "为改造而建",
-        "body": "项目页面把源码浏览放在宣传文案旁边，让仓库既能作为演示，也能成为新的起点。"
-      }
-    ],
-    "featuredPaths": ["README.md", "requirements.txt", "main.py"],
-    "tags": ["VQLS", "Qiskit", "原型"]
-  },
-  {
-    "slug": "variational-quantum-linear-solver",
-    "title": "Variational Quantum Linear Solver",
-    "kind": "研究仓库",
-    "repo": "FA-T-T/Variational-Quantum-Linear-Solver",
-    "branch": "main",
-    "sourceUrl": "https://github.com/FA-T-T/Variational-Quantum-Linear-Solver",
-    "summary": "一个公开的 VQLS 仓库，以独立项目页组织变分量子线性系统实验。",
-    "tagline": "把变分线性求解包装成清晰可见的项目。",
-    "focus": "变分量子算法与线性系统",
-    "audience": "面向比较 VQA 线性系统实现方式和实验布局的读者。",
-    "status": "公开仓库",
-    "repositoryStatus": "已在 GitHub 公开",
-    "theme": {
-      "accent": "#8bd17c",
-      "accent2": "#70b7ff",
-      "surface": "#111f17",
-      "soft": "#172b20"
-    },
-    "heroPoints": ["VQA 方法线", "线性系统", "公开源码", "研究档案"],
-    "metrics": [
-      { "value": "280", "label": "仓库文件已索引用于预览" },
-      { "value": "34", "label": "可预览源码与文档产物" },
-      { "value": "VQA", "label": "变分算法聚焦" }
-    ],
-    "story": [
-      {
-        "title": "独立的 VQLS 参考点",
-        "body": "项目把变分线性求解材料整理成独立公开入口，便于浏览、引用和横向比较。"
+        "title": "从科研材料抽取内容真值表",
+        "body": "输入可以是完整论文项目、单个 TeX 文件、Word 文档、Markdown 段落或带有 figures、images、assets 的研究项目文件夹。流程先抽取文本和图片资产，形成 source inventory 与 content manifest，再写 storyboard 和 style bible，而不是直接把摘要丢给图像模型。"
       },
       {
-        "title": "仓库上下文仍然可见",
-        "body": "故事下方的源码浏览器保留 README、安装文件和实现文件，让它们成为同一段项目叙事的一部分。"
-      }
-    ],
-    "featuredPaths": ["README.md", "requirements.txt"],
-    "tags": ["VQA", "线性求解", "仓库"]
-  },
-  {
-    "slug": "quantum-computing",
-    "title": "Quantum-Computing",
-    "kind": "知识档案",
-    "repo": "FA-T-T/Quantum-Computing",
-    "branch": "master",
-    "sourceUrl": "https://github.com/FA-T-T/Quantum-Computing",
-    "summary": "一个更宽的公开笔记与示例仓库，用来沉淀量子计算示例、参考资料和探索性材料。",
-    "tagline": "把量子计算笔记架做成可浏览的公共入口。",
-    "focus": "量子计算笔记、示例和实验",
-    "audience": "面向想查看有组织的量子计算笔记和示例，而不是单一成品包的读者。",
-    "status": "公开仓库",
-    "repositoryStatus": "已在 GitHub 公开",
-    "theme": {
-      "accent": "#d6a3ff",
-      "accent2": "#9ee6ff",
-      "surface": "#1b1728",
-      "soft": "#271f3a"
-    },
-    "heroPoints": ["笔记", "示例", "实验", "公开档案"],
-    "metrics": [
-      { "value": "40", "label": "仓库文件已索引用于预览" },
-      { "value": "38", "label": "可预览源码与文档产物" },
-      { "value": "档案", "label": "笔记本式材料" }
-    ],
-    "story": [
-      {
-        "title": "更宽的学习表面",
-        "body": "这个项目不是单一产品，更像是一组量子计算材料档案。按主题和文件直接浏览，反而更能体现它的价值。"
+        "title": "输出面向真实汇报场景",
+        "body": "它支持完整 image-native PPTX、PPTX proofsheet、单页 poster、系统架构图、方法 pipeline、paper illustration 风格图和 contact sheet。所有产物会保存在同一个 slides 目录里，便于复查、复用和迭代。"
       },
       {
-        "title": "源码就是界面",
-        "body": "项目页先给出档案定位，再保留仓库浏览器供读者直接检查。"
+        "title": "适合高信息密度的学术视觉语言",
+        "body": "默认风格是白底、浅色系、低装饰、高信息密度的 Nature / Science 式表达。它更适合组会、论文复现、proposal、系统方法图和科研 poster，而不是营销型演示或花哨模板。"
       }
     ],
-    "featuredPaths": ["README.md"],
-    "tags": ["量子", "笔记", "示例"]
+    "tags": ["学术汇报", "科研海报", "PPTX", "系统架构图"]
   }
 ]
