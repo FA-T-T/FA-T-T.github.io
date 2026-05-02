@@ -8,8 +8,8 @@ interface Props {
 const chapters = Astro.props.headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
 ---
 
-<nav class="chapter-nav" aria-label="文章章节">
-  <p class="rail-kicker">章节</p>
+<nav class="chapter-nav" aria-label="Article contents">
+  <p class="rail-kicker">Contents</p>
   {
     chapters.length > 0 ? (
       <ol>
@@ -20,7 +20,7 @@ const chapters = Astro.props.headings.filter((heading) => heading.depth >= 2 && 
         ))}
       </ol>
     ) : (
-      <p class="rail-empty">暂无章节。</p>
+      <p class="rail-empty">No sections.</p>
     )
   }
 </nav>
