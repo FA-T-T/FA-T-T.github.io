@@ -1,22 +1,5 @@
----
-article: src/content/blog/2023-11-function-calling-protocol.md
-status: revised-english-final
----
+# 审计
 
-# Audit
+文章按极简技术博客 skill 重写。标题去掉“第 3 篇”，保留原日期和 slug。正文聚焦函数调用作为可验证动作协议，包含 JavaScript tool call 和 dry-run 命令示例。
 
-Core claim: Function calling matters because it turns model output into a typed intermediate representation that can be validated, rejected, executed, retried, confirmed, replayed, and audited.
-
-Evidence table:
-
-| Source | Claim supported | Confidence | Limitation |
-| --- | --- | --- | --- |
-| https://openai.com/index/function-calling-and-other-api-updates/ | OpenAI introduced function calling as JSON arguments for developer-described functions and discussed risks from untrusted tool output. | High | Product details evolve; the article uses the source historically. |
-| https://openai.com/index/introducing-structured-outputs-in-the-api/ | Structured Outputs tightened schema adherence and noted schema constraints around parallel tool calls. | High | Later source used to explain the direction of the protocol. |
-| Local draft history | The original post covered schema, runtime, parallel tools, and output protocol. | High | It did not separate idempotency, schema evolution, tool choice, and confirmation. |
-
-Unverified or inference claims: The idempotency, versioning, and observability sections are API-engineering synthesis rather than cited product guarantees.
-
-Model-voice patterns removed: The article now grounds "tool reliability" in schemas, result envelopes, tool trust tags, retry safety, versioning, and confirmation snapshots.
-
-Questions for the author: Should the post include TypeScript or Python examples later? Should OpenAI-specific wording be further generalized for other tool protocols?
+未新增外部事实。原长文中的产品引用被移除，避免短文里出现未展开的证据链。

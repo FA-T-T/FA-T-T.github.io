@@ -1,22 +1,5 @@
----
-article: src/content/blog/2023-03-context-budget-rag.md
-status: revised-english-final
----
+# 审计
 
-# Audit
+文章按极简技术博客 skill 重写。标题去掉“第 2 篇”，保留原日期和 slug。正文聚焦 context 预算，包含检索命令、chunk 元数据示例和索引检查命令。
 
-Core claim: The hard part of RAG is not retrieving related text, but allocating context budget to evidence that is applicable, current, sourceable, and safe to use.
-
-Evidence table:
-
-| Source | Claim supported | Confidence | Limitation |
-| --- | --- | --- | --- |
-| https://arxiv.org/abs/2005.11401 | Retrieval-augmented generation combines parametric generation with retrieved non-parametric memory. | High | The paper predates many production RAG practices discussed here. |
-| https://arxiv.org/abs/2307.03172 | Long-context models may underuse information depending on position. | High | The budget taxonomy is an engineering synthesis. |
-| Local draft history | The original short post framed chunking, reranking, metadata, and context budget. | High | The original lacked a decomposed evaluation and refusal model. |
-
-Unverified or inference claims: The budget taxonomy, lifecycle governance, refusal metrics, and metadata operating model are proposed engineering patterns.
-
-Model-voice patterns removed: Generic "large windows do not solve RAG" language was replaced with failure mechanisms around half-facts, applicability, state summaries, document lifecycle, and refusal.
-
-Questions for the author: Should this later include a diagram of the RAG path? Should framework-specific examples be added, or should the post remain tool-agnostic?
+未新增外部事实。原长文中的论文引用被移除，避免短文里出现未展开的证据链。
