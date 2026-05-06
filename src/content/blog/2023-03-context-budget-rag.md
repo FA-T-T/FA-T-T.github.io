@@ -3,6 +3,7 @@ title: "上下文预算"
 date: 2023-03-20
 slug: "context-budget-rag"
 status: draft
+draft: true
 ---
 RAG 原型能回答公司政策，真实上线后却把过期条款和当前条款一起塞进上下文。
 

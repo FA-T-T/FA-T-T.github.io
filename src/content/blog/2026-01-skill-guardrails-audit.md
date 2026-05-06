@@ -3,6 +3,7 @@ title: "技能护栏审计"
 date: 2026-01-20
 slug: "skill-guardrails-audit"
 status: draft
+draft: true
 ---
 一次 agent 运行可能读文件、调工具、写结果，如果只检查最终回答，事故已经发生。
 

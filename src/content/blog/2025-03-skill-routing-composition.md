@@ -3,6 +3,7 @@ title: "技能路由"
 date: 2025-03-12
 slug: "skill-routing-composition"
 status: draft
+draft: true
 ---
 当项目里有十几个 skills，同一句“帮我发布文章”可能同时触发写作、构建、Git 和发布规则。
 

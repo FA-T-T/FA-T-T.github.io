@@ -3,6 +3,7 @@ title: "提示词即程序"
 date: 2022-12-15
 slug: "prompt-as-program"
 status: draft
+draft: true
 ---
 团队把同一段提示词复制到三个脚本里，模型升级后输出字段漂移，下游解析器先坏。
 

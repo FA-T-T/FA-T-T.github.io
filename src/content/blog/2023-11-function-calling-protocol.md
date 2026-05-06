@@ -3,6 +3,7 @@ title: "函数调用协议"
 date: 2023-11-10
 slug: "function-calling-protocol"
 status: draft
+draft: true
 ---
 模型说“我会帮你订票”并不危险，危险的是系统直接把这句话当成订票动作执行。
 

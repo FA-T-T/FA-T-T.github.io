@@ -3,6 +3,7 @@ title: "技能执行单元"
 date: 2024-06-18
 slug: "skill-as-harness-unit"
 status: draft
+draft: true
 ---
 一个团队把提示词、脚本和参考资料分别放在三个地方，换人维护时工作流立刻失忆。
 
